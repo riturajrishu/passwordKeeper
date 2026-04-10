@@ -17,10 +17,17 @@ import shareRoutes from './routes/shareRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Production Check
+if (process.env.NODE_ENV === 'production') {
+  console.log('--- PRODUCTION MODE ACTIVE ---');
+  if (!process.env.JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
+    process.exit(1);
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +49,7 @@ const buildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(buildPath));
 
 // Database Connection
+console.log('Connecting to Database...');
 connectDB();
 
 // Routes
