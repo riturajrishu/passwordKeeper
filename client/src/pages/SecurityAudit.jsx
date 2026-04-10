@@ -231,23 +231,23 @@ const SecurityAudit = () => {
     });
 
     return (
-        <div className="p-4 lg:p-8 max-w-7xl mx-auto space-y-8 pb-16">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-5 sm:space-y-8 pb-16">
             <header>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Security Audit</h1>
-                <p className="text-muted-foreground text-sm">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-1">Security Audit</h1>
+                <p className="text-muted-foreground text-xs sm:text-sm">
                     Detailed health analysis of your vault · <span className="font-bold text-foreground">{stats.total}</span> active items
                 </p>
             </header>
 
             {/* ── Top 3 cards ─────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 
                 {/* Health Score */}
                 <motion.div {...fadeUp(0)}
-                    className="glass-panel p-6 sm:p-8 rounded-3xl border border-border flex flex-col items-center justify-center text-center relative overflow-hidden"
+                    className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border flex flex-col items-center justify-center text-center relative overflow-hidden"
                 >
                     <div className="absolute top-0 left-0 w-full h-1" style={{ background: `linear-gradient(90deg, transparent, ${scoreColor}, transparent)` }} />
-                    <div className="relative w-36 h-36 mb-5">
+                    <div className="relative w-28 h-28 sm:w-36 sm:h-36 mb-4 sm:mb-5">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 144 144">
                             <circle cx="72" cy="72" r="62" stroke="currentColor" strokeWidth="8" fill="none" className="text-black/5 dark:text-white/8" />
                             <circle
@@ -261,18 +261,18 @@ const SecurityAudit = () => {
                             />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-4xl font-black leading-none">{stats.score}</span>
+                            <span className="text-3xl sm:text-4xl font-black leading-none">{stats.score}</span>
                             <span className="text-[9px] font-bold uppercase tracking-widest opacity-50 mt-1">Health Score</span>
                         </div>
                     </div>
-                    <p className="text-sm font-medium mb-5 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-medium mb-4 sm:mb-5 leading-relaxed">
                         Your vault is{' '}
                         <span className="font-bold" style={{ color: scoreColor }}>
                             {stats.score >= 80 ? 'well secured' : stats.score >= 50 ? 'moderately secure' : 'at risk'}
                         </span>.{' '}
                         {stats.weak > 0 ? `${stats.weak} weak password${stats.weak > 1 ? 's' : ''} need attention.` : stats.missing2fa > 0 ? `Enable 2FA on ${stats.missing2fa} login${stats.missing2fa > 1 ? 's' : ''}.` : 'Keep it up!'}
                     </p>
-                    <div className="grid grid-cols-4 gap-2 w-full pt-4 border-t border-border/50 text-center">
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full pt-3 sm:pt-4 border-t border-border/50 text-center">
                         {[
                             { label: 'Total', value: stats.total, color: '' },
                             { label: 'Weak', value: stats.weak, color: 'text-red-500' },
@@ -280,8 +280,8 @@ const SecurityAudit = () => {
                             { label: 'No 2FA', value: stats.missing2fa, color: 'text-orange-400' },
                         ].map(s => (
                             <div key={s.label}>
-                                <p className={`text-base font-black ${s.color}`}>{s.value}</p>
-                                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
+                                <p className={`text-sm sm:text-base font-black ${s.color}`}>{s.value}</p>
+                                <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</p>
                             </div>
                         ))}
                     </div>
@@ -289,7 +289,7 @@ const SecurityAudit = () => {
 
                 {/* Strength Distribution Pie */}
                 <motion.div {...fadeUp(0.08)}
-                    className="glass-panel p-6 sm:p-8 rounded-3xl border border-border flex flex-col"
+                    className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border flex flex-col"
                 >
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Strength Distribution</h3>
                     {stats.withPassword === 0 ? (
@@ -349,7 +349,7 @@ const SecurityAudit = () => {
 
                 {/* Item Type Distribution */}
                 <motion.div {...fadeUp(0.16)}
-                    className="glass-panel p-6 sm:p-8 rounded-3xl border border-border flex flex-col"
+                    className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border flex flex-col"
                 >
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">
                         Item Type Distribution
@@ -397,7 +397,7 @@ const SecurityAudit = () => {
             </div>
 
             {/* ── Security Insight Rows ──────────────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
                 {/* Reused Passwords */}
                 <motion.div {...fadeUp(0.2)} className="glass-panel rounded-3xl border border-border overflow-hidden">
@@ -526,11 +526,11 @@ const SecurityAudit = () => {
 
             {/* ── Critical Alerts section ───────────────────────────────── */}
             <section className="space-y-4">
-                <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <h2 className="text-base sm:text-lg lg:text-xl font-bold flex items-center gap-2">
                     <ShieldAlert className="text-primary shrink-0" />
                     Security Recommendations
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {stats.weak > 0 && (
                         <Alert icon={AlertTriangle} color="red"
                             title={`${stats.weak} Weak Password${stats.weak > 1 ? 's' : ''} Detected`}
@@ -583,7 +583,7 @@ const COLOR_MAP = {
 const Alert = ({ icon: Icon, color, title, desc }) => {
     const c = COLOR_MAP[color] || COLOR_MAP.blue;
     return (
-        <div className={`glass-panel p-5 rounded-2xl border flex gap-4 ${c.bg}`}>
+        <div className={`glass-panel p-3.5 sm:p-5 rounded-2xl border flex gap-3 sm:gap-4 ${c.bg}`}>
             <div className={`p-2 rounded-xl h-fit shrink-0 ${c.icon}`}><Icon size={18} /></div>
             <div>
                 <p className="font-bold text-sm mb-1">{title}</p>

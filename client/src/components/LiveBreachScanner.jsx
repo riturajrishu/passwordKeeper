@@ -47,11 +47,11 @@ const LiveBreachScanner = () => {
     };
 
     return (
-        <div className="glass-panel p-6 rounded-3xl border border-border">
+        <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border">
             <div className="flex items-start justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Search className="text-primary" /> Deep Web Breach Scanner
+                    <h3 className="text-base sm:text-xl font-bold flex items-center gap-2">
+                        <Search className="text-primary shrink-0" size={18} /> Deep Web Breach Scanner
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
                         Check if your email has been compromised in any known data breaches worldwide.
@@ -59,7 +59,7 @@ const LiveBreachScanner = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleScan} className="flex gap-2 max-w-xl mb-6">
+            <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-2 sm:gap-2 max-w-xl mb-6">
                 <div className="relative flex-1">
                     <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <input 
@@ -74,7 +74,7 @@ const LiveBreachScanner = () => {
                 <button 
                     type="submit" 
                     disabled={loading}
-                    className="bg-primary text-black px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2"
+                    className="bg-primary text-black px-4 sm:px-6 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2 text-sm whitespace-nowrap shrink-0"
                 >
                     {loading ? <Loader2 size={18} className="animate-spin" /> : "Scan Deep Web"}
                 </button>
@@ -111,7 +111,7 @@ const LiveBreachScanner = () => {
 
                         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                             {result.breaches.map((breach, idx) => (
-                                <div key={idx} className="p-5 bg-black/20 dark:bg-white/5 border border-red-500/30 rounded-xl relative overflow-hidden flex gap-4 transition-all hover:bg-black/30">
+                                <div key={idx} className="p-3 sm:p-5 bg-black/20 dark:bg-white/5 border border-red-500/30 rounded-xl relative overflow-hidden flex flex-col sm:flex-row gap-3 sm:gap-4 transition-all hover:bg-black/30">
                                     <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
                                     {breach.logo && (
                                         <div className="flex-shrink-0 w-12 h-12 bg-white rounded-lg p-1 hidden sm:block shadow-sm">
@@ -119,7 +119,7 @@ const LiveBreachScanner = () => {
                                         </div>
                                     )}
                                     <div className="flex-1">
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0 mb-2">
                                             <div>
                                                 <h4 className="font-bold text-lg tracking-tight">{breach.breach}</h4>
                                                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">{breach.domain || 'Compromised Service'}</p>

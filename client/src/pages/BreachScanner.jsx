@@ -119,10 +119,10 @@ export default function BreachScanner() {
     const cleanCount = results.filter(r => r.count === 0).length;
 
     return (
-        <div className="p-4 lg:p-8 pb-12 max-w-6xl mx-auto space-y-8">
+        <div className="p-3 sm:p-4 lg:p-8 pb-12 max-w-6xl mx-auto space-y-5 sm:space-y-8">
             <header>
-                <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
-                    <Radar className={isScanning ? "animate-spin-slow text-primary" : "text-muted-foreground"} size={28} />
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-2 flex items-center gap-2 sm:gap-3">
+                        <Radar className={isScanning ? "animate-spin-slow text-primary" : "text-muted-foreground"} size={22} />
                     Dark Web Scanner
                 </h1>
                 <p className="text-muted-foreground text-sm">Actively monitor your identity and passwords against known data breaches.</p>
@@ -134,11 +134,11 @@ export default function BreachScanner() {
             {loading ? (
                 <div className="flex justify-center p-20"><Loader2 className="animate-spin text-primary" size={40} /></div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mt-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 mt-5 sm:mt-8">
                     
                     {/* Radar & Control Panel */}
                     <div className="lg:col-span-4 space-y-6">
-                        <div className="glass-panel p-8 rounded-3xl border border-border flex flex-col items-center justify-center text-center relative overflow-hidden h-[340px]">
+                        <div className="glass-panel p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-border flex flex-col items-center justify-center text-center relative overflow-hidden h-[280px] sm:h-[340px]">
                             {/* Animated Background */}
                             <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
                                 <motion.div 
@@ -215,7 +215,7 @@ export default function BreachScanner() {
 
                     {/* Live Results Stream */}
                     <div className="lg:col-span-8">
-                        <div className="glass-panel rounded-3xl border border-border overflow-hidden flex flex-col h-[400px] lg:h-[500px]">
+                        <div className="glass-panel rounded-2xl sm:rounded-3xl border border-border overflow-hidden flex flex-col h-[350px] sm:h-[400px] lg:h-[500px]">
                             <div className="p-4 border-b border-border/50 bg-black/5 dark:bg-white/5 flex items-center justify-between shadow-sm z-10">
                                 <h3 className="font-bold text-sm uppercase tracking-widest">Scan Activity Log</h3>
                                 {isScanning && <div className="flex items-center gap-2"><Loader2 size={14} className="animate-spin text-primary" /><span className="text-xs text-primary font-mono animate-pulse">Processing...</span></div>}

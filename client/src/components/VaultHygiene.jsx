@@ -94,15 +94,15 @@ export default function VaultHygiene({ items }) {
         <motion.div 
             initial={{ opacity: 0, y: -20, rotateX: -10 }} 
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            className="mb-8 w-full perspective-1000"
+            className="mb-5 sm:mb-8 w-full perspective-1000"
         >
-            <div className="glass-panel p-6 sm:p-8 rounded-[2rem] border border-white/10 dark:border-white/5 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center gap-8 bg-gradient-to-br from-background via-background to-primary/5">
+            <div className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[2rem] border border-white/10 dark:border-white/5 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center gap-4 sm:gap-8 bg-gradient-to-br from-background via-background to-primary/5">
                 
                 {/* AI Glow Sphere */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
                 {/* Score Circular Meter */}
-                <div className="relative shrink-0 w-32 h-32 flex items-center justify-center">
+                <div className="relative shrink-0 w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90">
                         {/* Track */}
                         <circle cx="64" cy="64" r="54" stroke="currentColor" strokeWidth="8" fill="none" className="text-black/5 dark:text-white/5" />
@@ -119,7 +119,7 @@ export default function VaultHygiene({ items }) {
                         />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={clsx("text-3xl font-black tracking-tighter", statusColor)}>{score}</span>
+                        <span className={clsx("text-2xl sm:text-3xl font-black tracking-tighter", statusColor)}>{score}</span>
                         <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Health</span>
                     </div>
                 </div>

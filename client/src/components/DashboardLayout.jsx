@@ -138,7 +138,7 @@ const DashboardLayout = () => {
     const currentOutlet = useOutlet();
 
     return (
-        <div className="flex h-screen bg-background text-foreground overflow-hidden">
+        <div className="flex h-[100dvh] bg-background text-foreground overflow-hidden">
             {/* Background Managers (No-UI) */}
             <ActivityManager />
             <TicketNotificationsManager />
@@ -152,7 +152,7 @@ const DashboardLayout = () => {
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col relative overflow-hidden bg-background">
                 {/* Global Header */}
-                <header className="h-16 lg:h-20 border-b border-border flex items-center justify-between px-4 lg:px-8 glass-panel sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+                <header className="h-14 sm:h-16 lg:h-20 border-b border-border flex items-center justify-between px-3 sm:px-4 lg:px-8 glass-panel sticky top-0 z-40 bg-background/80 backdrop-blur-md shrink-0">
                     <div className="flex items-center gap-3 flex-1 lg:hidden">
                         <button 
                             className="p-2 text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors"
@@ -196,7 +196,7 @@ const DashboardLayout = () => {
                 </header>
 
                 {/* Page Content Holder */}
-                <div className="flex-1 overflow-auto relative custom-scrollbar overscroll-contain">
+                <div className="flex-1 overflow-auto relative custom-scrollbar overscroll-contain -webkit-overflow-scrolling-touch">
                     {/* Background Decorative Gradients */}
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -z-10 pointer-events-none opacity-50" />
                     <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] -z-10 pointer-events-none opacity-30" />

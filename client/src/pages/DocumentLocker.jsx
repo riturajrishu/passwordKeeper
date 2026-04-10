@@ -205,12 +205,12 @@ export default function DocumentLocker() {
     });
 
     return (
-        <div className="p-6 max-w-6xl mx-auto pb-40">
+        <div className="p-3 sm:p-4 lg:p-6 max-w-6xl mx-auto pb-40">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black mb-2 flex items-center gap-3">
-                        <HardDrive className="text-primary" size={32} />
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black mb-2 flex items-center gap-2 sm:gap-3">
+                        <HardDrive className="text-primary shrink-0" size={24} />
                         Document Locker
                     </h1>
                     <p className="text-muted-foreground">Secure your sensitive files with zero-knowledge encryption.</p>
@@ -219,7 +219,7 @@ export default function DocumentLocker() {
 
             {/* Drag & Drop Upload Zone */}
             <div 
-                className={`w-full relative rounded-2xl border-2 border-dashed transition-all p-12 flex flex-col items-center justify-center text-center overflow-hidden mb-8
+                className={`w-full relative rounded-2xl border-2 border-dashed transition-all p-6 sm:p-12 flex flex-col items-center justify-center text-center overflow-hidden mb-6 sm:mb-8
                     ${dragActive ? 'border-primary bg-primary/10' : 'border-border bg-black/5 dark:bg-white/5'}
                     ${uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:border-primary/50'}
                 `}
@@ -300,7 +300,7 @@ export default function DocumentLocker() {
                     <p className="text-muted-foreground">Upload your first secure document to get started.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <AnimatePresence>
                         {filteredItems.map(item => (
                             <motion.div

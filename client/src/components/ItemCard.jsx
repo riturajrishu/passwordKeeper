@@ -178,7 +178,7 @@ export default function ItemCard({
     );
 
     const renderCreditCardContent = () => (
-        <div className="perspective-1000 w-full h-40 cursor-pointer" onClick={() => setIsFlipped(f => !f)}>
+        <div className="perspective-1000 w-full h-36 sm:h-40 cursor-pointer" onClick={() => setIsFlipped(f => !f)}>
             <motion.div
                 className="w-full h-full relative transform-style-3d transition-transform duration-700"
                 animate={{ rotateY: isFlipped ? 180 : 0 }}

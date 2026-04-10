@@ -282,18 +282,18 @@ const Settings = () => {
     };
 
     return (
-        <div className="p-4 lg:p-8 max-w-5xl mx-auto space-y-10 pb-20">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-10 pb-20">
             <header>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-2">Settings</h1>
                 <p className="text-muted-foreground text-sm">Personalize and secure your Keeper X experience.</p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-10">
                 {/* Left Column: Account & Security */}
-                <div className="lg:col-span-8 space-y-10">
+                <div className="lg:col-span-8 space-y-6 sm:space-y-10">
 
                     {/* General Profile Section */}
-                    <section className="glass-panel p-8 rounded-3xl border border-border space-y-6">
+                    <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 sm:space-y-6">
                         <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                             <div className="p-2 bg-primary/10 rounded-lg text-primary"><User size={20} /></div>
                             <h2 className="text-xl font-bold">Account Profile</h2>
@@ -322,7 +322,7 @@ const Settings = () => {
                     </section>
 
                     {/* Security & Re-encryption Section */}
-                    <section className="glass-panel p-8 rounded-3xl border border-border space-y-6 relative overflow-hidden">
+                    <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 sm:space-y-6 relative overflow-hidden">
                         {securityLoading && (
                             <div className="absolute inset-0 z-50 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6">
                                 <Loader2 size={40} className="text-primary animate-spin mb-4" />
@@ -379,12 +379,12 @@ const Settings = () => {
                     </section>
 
                     {/* Passkey Section */}
-                    <section className="glass-panel p-8 rounded-3xl border border-border space-y-6">
+                    <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 sm:space-y-6">
                         <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                             <div className="p-2 bg-primary/10 rounded-lg text-primary"><KeyRound size={20} /></div>
                             <h2 className="text-xl font-bold">Passkeys & WebAuthn</h2>
                         </div>
-                        <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-border/50">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-border/50 gap-3">
                             <div>
                                 <h4 className="font-bold text-sm">Biometric Login Setup</h4>
                                 <p className="text-xs text-muted-foreground mt-1 max-w-sm">
@@ -406,7 +406,7 @@ const Settings = () => {
                     <DeviceManager />
 
                     {/* Shamir's Secret Sharing (Emergency Recovery) */}
-                    <section className="glass-panel p-8 rounded-3xl border border-border border-l-4 border-l-orange-500 space-y-6 bg-gradient-to-br from-background to-orange-500/5">
+                    <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border border-l-4 border-l-orange-500 space-y-4 sm:space-y-6 bg-gradient-to-br from-background to-orange-500/5">
                         <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                             <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500"><Lock size={20} /></div>
                             <div>
@@ -417,7 +417,7 @@ const Settings = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
                             {/* Generator */}
                             <div className="space-y-4">
                                 <h3 className="font-bold text-sm text-primary uppercase tracking-widest">Generate Shares</h3>
@@ -486,7 +486,7 @@ const Settings = () => {
                 </div>
 
                 {/* Right Column: Preferences & Extra Actions */}
-                <div className="lg:col-span-4 space-y-10">
+                <div className="lg:col-span-4 space-y-6 sm:space-y-10">
 
                     {/* Appearance Section */}
                     <section className="glass-panel p-6 rounded-3xl border border-border space-y-6">

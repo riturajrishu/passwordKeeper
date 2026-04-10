@@ -337,3 +337,47 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ============================================================
+   Mobile-Specific Overrides
+   ============================================================ */
+
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Reduce heavy blur effects on mobile for performance */
+  body::before,
+  body::after {
+    display: none;
+  }
+
+  .glass-panel {
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+}
+
+/* Mobile touch target minimum sizes */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+}
+
+/* Fix for mobile address bar hiding causing layout jumps */
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+}

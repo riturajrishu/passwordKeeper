@@ -67,23 +67,23 @@ const PhishingAnalyzer = () => {
     };
 
     return (
-        <div className="p-4 lg:p-8 max-w-5xl mx-auto space-y-8">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-5 sm:space-y-8">
             <header>
-                <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
-                    <Bot className="text-primary" size={32} /> AI Phishing Analyzer
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-2 flex items-center gap-2 sm:gap-3">
+                    <Bot className="text-primary shrink-0" size={24} /> AI Phishing Analyzer
                 </h1>
                 <p className="text-muted-foreground text-sm">Paste suspicious emails, SMS texts, or URLs. Our heuristic engine will evaluate the risk of social engineering.</p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
                 {/* Input Section */}
-                <div className="glass-panel p-6 rounded-3xl border border-border flex flex-col h-full">
+                <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border flex flex-col h-full">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 block">Message Content / URL</label>
                     <textarea 
                         value={input}
                         onChange={e => setInput(e.target.value)}
                         placeholder="Paste the suspicious content here..."
-                        className="w-full h-64 px-5 py-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none custom-scrollbar mb-4"
+                        className="w-full h-40 sm:h-64 px-4 sm:px-5 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-black/5 dark:bg-white/5 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none custom-scrollbar mb-3 sm:mb-4"
                         disabled={isAnalyzing}
                     />
                     
@@ -114,7 +114,7 @@ const PhishingAnalyzer = () => {
                 </div>
 
                 {/* Results Section */}
-                <div className="glass-panel p-6 rounded-3xl border border-border relative overflow-hidden flex flex-col">
+                <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border relative overflow-hidden flex flex-col min-h-[280px] sm:min-h-0">
                     {!result && !isAnalyzing && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center opacity-30 pointer-events-none p-10 text-center">
                             <Bot size={64} className="mb-4 text-muted-foreground" />
@@ -133,13 +133,13 @@ const PhishingAnalyzer = () => {
                     <AnimatePresence>
                         {result && (
                             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col h-full z-20 relative">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className={clsx("w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-xl", result.score < 50 ? "border-red-500 text-red-500 bg-red-500/10" : result.score < 80 ? "border-yellow-500 text-yellow-500 bg-yellow-500/10" : "border-green-500 text-green-500 bg-green-500/10")}>
-                                        <span className="text-2xl font-black">{result.score}</span>
+                                <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+                                    <div className={clsx("w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center border-4 shadow-xl shrink-0", result.score < 50 ? "border-red-500 text-red-500 bg-red-500/10" : result.score < 80 ? "border-yellow-500 text-yellow-500 bg-yellow-500/10" : "border-green-500 text-green-500 bg-green-500/10")}>
+                                        <span className="text-xl sm:text-2xl font-black">{result.score}</span>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Safety Verdict</p>
-                                        <h2 className={clsx("text-2xl font-black tracking-tight", result.score < 50 ? "text-red-500" : result.score < 80 ? "text-yellow-500" : "text-green-500")}>
+                                        <h2 className={clsx("text-xl sm:text-2xl font-black tracking-tight", result.score < 50 ? "text-red-500" : result.score < 80 ? "text-yellow-500" : "text-green-500")}>
                                             {result.riskLable}
                                         </h2>
                                     </div>

@@ -131,7 +131,7 @@ export default function Trash() {
     };
 
     return (
-        <div className="p-4 lg:p-8 max-w-5xl mx-auto space-y-8 pb-16">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-5 sm:space-y-8 pb-16">
             <header className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1 flex items-center gap-3 text-red-500">

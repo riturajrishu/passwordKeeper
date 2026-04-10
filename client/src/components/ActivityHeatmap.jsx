@@ -48,13 +48,13 @@ const ActivityHeatmap = ({ items }) => {
     };
 
     return (
-        <div className="glass-panel p-6 rounded-3xl border border-border">
+        <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-border">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-4">Vault Activity (Last 90 Days)</h3>
-            <div className="flex flex-wrap gap-1.5 justify-end">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-end overflow-hidden">
                 {heatMapData.map((day, idx) => (
                     <div
                         key={idx}
-                        className={`w-3 h-3 md:w-4 md:h-4 rounded-sm ${getColor(day.count)} transition-all hover:scale-125 cursor-help`}
+                        className={`w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-sm ${getColor(day.count)} transition-all hover:scale-125 cursor-help`}
                         title={`${day.date.toDateString()}: ${day.count} activities`}
                     />
                 ))}

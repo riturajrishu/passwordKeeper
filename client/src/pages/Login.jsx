@@ -658,7 +658,7 @@ export default function Login() {
                             </p>
 
                             <div className="relative group cursor-pointer mb-8" onClick={copyRecoveryKey}>
-                                <div className="bg-black/40 border border-white/10 rounded-2xl p-6 font-mono text-2xl tracking-[0.3em] text-primary font-bold shadow-inner">
+                                <div className="bg-black/40 border border-white/10 rounded-2xl p-4 sm:p-6 font-mono text-base sm:text-2xl tracking-[0.15em] sm:tracking-[0.3em] text-primary font-bold shadow-inner break-all">
                                     {recoveryKey}
                                 </div>
                                 <div className="absolute inset-0 flex items-center justify-center bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">

@@ -53,7 +53,7 @@ export default function SupportCenter() {
     };
 
     return (
-        <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-4xl mx-auto space-y-5 sm:space-y-8">
             <header className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-3">

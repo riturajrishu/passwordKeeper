@@ -188,7 +188,7 @@ export default function EmergencyAccess() {
 
     // ══════════════════════════════════════════════════════════════════
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-5 sm:space-y-8 pb-16">
 
             {/* ── Header ────────────────────────────────────────────── */}
             <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
@@ -269,7 +269,7 @@ export default function EmergencyAccess() {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Contact Name *</label>
                                 <input id="emergency-contact-name"

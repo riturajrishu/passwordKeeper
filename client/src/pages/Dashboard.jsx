@@ -74,14 +74,14 @@ function getStrength(pwd) {
 const StatCard = ({ icon: Icon, label, value, color = 'text-muted-foreground', bg = '' }) => (
     <motion.div
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-        className={`flex items-center gap-4 px-5 py-4 rounded-xl border border-border/60 bg-card shadow-premium ${bg}`}
+        className={`flex items-center gap-2.5 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4 rounded-xl border border-border/60 bg-card shadow-premium ${bg}`}
     >
         <div className={`p-2.5 rounded-xl bg-muted shadow-inner ${color}`}>
-            <Icon size={18} />
+            <Icon size={16} />
         </div>
         <div>
-            <p className="text-2xl font-black leading-none text-foreground tracking-tight">{value}</p>
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1.5 opacity-70">{label}</p>
+            <p className="text-lg sm:text-2xl font-black leading-none text-foreground tracking-tight">{value}</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1 sm:mt-1.5 opacity-70">{label}</p>
         </div>
     </motion.div>
 );
@@ -283,12 +283,12 @@ export default function Dashboard() {
     }, [items]);
 
     return (
-        <div className="p-4 lg:p-8 pb-16">
+        <div className="p-3 sm:p-4 lg:p-8 pb-16">
 
             {/* ─ Page header ──────────────────────────────────── */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
                 <div>
-                    <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground mb-1">Vault Overview</h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-4xl font-black tracking-tight text-foreground mb-1">Vault Overview</h1>
                     <p className="text-muted-foreground text-[11px] sm:text-sm font-medium">
                         {stats.total} item{stats.total !== 1 ? 's' : ''} <span className="hidden xs:inline">encrypted with AES-256</span> <span className="hidden md:inline">· Press <kbd className="px-2 py-1 rounded-lg bg-muted border border-border text-[10px] font-mono shadow-sm">Ctrl+N</kbd></span>
                     </p>
@@ -325,7 +325,7 @@ export default function Dashboard() {
 
             {/* ─ Stats bar (only when items loaded) ────────────────── */}
             {!loading && items.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <StatCard icon={Shield} label="Total Items" value={stats.total} color="text-primary" />
                     <StatCard icon={Star} label="Favourites" value={stats.favorites} color="text-yellow-500" />
                     <StatCard
@@ -340,7 +340,7 @@ export default function Dashboard() {
             )}
 
             {/* ─ Filter Bar ────────────────────────────────────── */}
-            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8 overflow-x-auto pb-3 sm:pb-4 no-scrollbar -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0">
                 <div className="flex bg-muted/60 p-1.5 rounded-2xl border border-border/60 shadow-inner shrink-0">
                     {[
                         { id: 'all', label: 'All Items' },
@@ -392,7 +392,7 @@ export default function Dashboard() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="glass-panel rounded-3xl border border-border p-16 sm:p-20 text-center max-w-md mx-auto"
+                    className="glass-panel rounded-3xl border border-border p-10 sm:p-16 lg:p-20 text-center max-w-md mx-auto"
                 >
                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto text-primary">
                         <Filter size={32} />
@@ -423,7 +423,7 @@ export default function Dashboard() {
                     variants={staggerContainer}
                     initial="hidden"
                     animate="show"
-                    className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5 sm:gap-6"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6"
                 >
                     {filteredItems.map(item => (
                         <ItemCard
