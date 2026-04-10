@@ -65,26 +65,27 @@ export default function MasterPasswordPrompt() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+      {/* Decorative Blob */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, ease: 'easeOut' }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[600px] h-[240px] md:h-[600px] bg-primary/10 rounded-full blur-[80px] md:blur-[100px] -z-10"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-primary/10 rounded-full blur-[100px] -z-10"
       />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : { opacity: 1, y: 0 }}
         transition={isShaking ? { duration: 0.4 } : { duration: 0.5, ease: 'easeOut' }}
-        className="glass-panel p-6 sm:p-10 rounded-3xl w-full max-w-md flex flex-col items-center"
+        className="glass-panel p-6 md:p-10 rounded-3xl w-full max-w-md flex flex-col items-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6 shadow-inner"
+          className="w-20 h-20 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6 shadow-inner"
         >
-          <KeyRound size={32} className="sm:size-10 drop-shadow-lg" />
+          <KeyRound size={40} className="drop-shadow-lg" />
         </motion.div>
 
         <motion.h2
@@ -100,7 +101,7 @@ export default function MasterPasswordPrompt() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-muted-foreground text-center mb-6 sm:mb-8 text-sm sm:text-base px-2"
+          className="text-muted-foreground text-center mb-8 text-sm md:text-base px-2"
         >
           Enter your master password to decrypt your saved credentials.
           <span className="block mt-1 text-xs opacity-70">

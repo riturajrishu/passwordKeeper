@@ -157,7 +157,7 @@ export default function EmergencyInvite() {
                                 </p>
                             </div>
 
-                            <div className="p-4 sm:p-8 space-y-5">
+                            <div className="p-8 space-y-5">
                                 {/* Info cards */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
@@ -234,7 +234,7 @@ export default function EmergencyInvite() {
                                     <h2 className="text-xl font-black text-white">You're All Set!</h2>
                                     <p className="text-white/50 text-sm mt-1">Emergency access has been configured</p>
                                 </div>
-                                <div className="p-4 sm:p-8 space-y-4">
+                                <div className="p-8 space-y-4">
                                     <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl text-xs text-green-200/70 space-y-1.5">
                                         <p className="font-bold text-green-300">✅ Your keys have been saved to this browser</p>
                                         <p>To access the vault from a different device, download the private key backup below.</p>

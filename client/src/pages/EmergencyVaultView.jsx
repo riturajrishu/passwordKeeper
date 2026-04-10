@@ -304,12 +304,12 @@ export default function EmergencyVaultView() {
                     {/* ── Checking / Loading ─────────────────────────── */}
                     {(phase === PHASE.CHECKING_KEY || phase === PHASE.LOADING_VAULT || phase === PHASE.REQUESTING) && (
                         <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-12 text-center">
-                            <div className="relative mx-auto w-12 h-12 sm:w-16 sm:h-16 mb-6">
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center">
+                            <div className="relative mx-auto w-16 h-16 mb-6">
                                 <div className="absolute inset-0 rounded-full border-2 border-violet-500/20" />
                                 <div className="absolute inset-0 rounded-full border-t-2 border-violet-400 animate-spin" />
                             </div>
-                            <p className="text-white/70 font-semibold text-sm sm:text-base">
+                            <p className="text-white/70 font-semibold">
                                 {phase === PHASE.REQUESTING ? 'Submitting access request…' : 'Checking access status…'}
                             </p>
                         </motion.div>
@@ -318,19 +318,19 @@ export default function EmergencyVaultView() {
                     {/* ── Ready to Request ─────────────────────────────── */}
                     {phase === PHASE.READY_TO_REQUEST && (
                         <motion.div key="ready" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-10 text-center space-y-5 sm:space-y-6">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-violet-500/10 rounded-full flex items-center justify-center mb-4 sm:mb-5 mx-auto border border-violet-400/20">
-                                <Shield size={24} className="sm:size-[28px] text-violet-400" />
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 text-center space-y-6">
+                            <div className="w-16 h-16 bg-violet-500/10 rounded-full flex items-center justify-center mb-5 mx-auto border border-violet-400/20">
+                                <Shield size={28} className="text-violet-400" />
                             </div>
                             <div>
-                                <h2 className="text-lg sm:text-xl font-bold text-white">Emergency Vault Access</h2>
-                                <p className="text-white/50 text-xs sm:text-sm mt-2">
+                                <h2 className="text-xl font-bold text-white">Emergency Vault Access</h2>
+                                <p className="text-white/50 text-sm mt-2">
                                     If the vault owner has been inactive for the required period, you can request access to their vault. They will have 24 hours to deny your request.
                                 </p>
                             </div>
-                            <div className="p-3 sm:p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-left">
-                                <p className="text-[11px] font-bold text-blue-300 mb-1.5">🔐 What happens next?</p>
-                                <div className="text-[10px] sm:text-[11px] text-blue-200/60 space-y-1">
+                            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-left">
+                                <p className="text-xs font-bold text-blue-300 mb-1.5">🔐 What happens next?</p>
+                                <div className="text-[11px] text-blue-200/60 space-y-1">
                                     <p>1. We check if the owner has been inactive long enough.</p>
                                     <p>2. If yes, an access request is submitted.</p>
                                     <p>3. The owner gets 24 hours to deny. Otherwise, access is granted.</p>
@@ -340,24 +340,24 @@ export default function EmergencyVaultView() {
                                 id="emergency-request-access-btn"
                                 whileTap={{ scale: 0.97 }}
                                 onClick={handleRequestAccess}
-                                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 sm:py-3.5 rounded-2xl font-bold shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm"
+                                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2 hover:opacity-90 transition-all"
                             >
                                 <AlertTriangle size={16} /> Request Emergency Access
                             </motion.button>
-                            <p className="text-white/30 text-[10px]">Contact ID: {contactId}</p>
+                            <p className="text-white/30 text-xs">Contact ID: {contactId}</p>
                         </motion.div>
                     )}
 
                     {/* ── No Private Key ─────────────────────────────── */}
                     {phase === PHASE.NO_KEY && (
                         <motion.div key="nokey" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                            className="bg-white/5 backdrop-blur-xl border border-amber-500/20 rounded-3xl p-6 sm:p-8 text-center space-y-5 sm:space-y-6">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-amber-500/10 rounded-full flex items-center justify-center mb-1 sm:mb-2 mx-auto border border-amber-400/20">
-                                <Key size={24} className="sm:size-[28px] text-amber-400" />
+                            className="bg-white/5 backdrop-blur-xl border border-amber-500/20 rounded-3xl p-8 text-center space-y-6">
+                            <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mb-2 mx-auto border border-amber-400/20">
+                                <Key size={28} className="text-amber-400" />
                             </div>
                             <div>
-                                <h2 className="text-lg sm:text-xl font-bold text-white">Private Key Not Found</h2>
-                                <p className="text-white/50 text-xs sm:text-sm mt-2">
+                                <h2 className="text-xl font-bold text-white">Private Key Not Found</h2>
+                                <p className="text-white/50 text-sm mt-2">
                                     Your secure access key is missing from this browser. You need it to decrypt the vault.
                                 </p>
                             </div>
@@ -450,13 +450,13 @@ export default function EmergencyVaultView() {
                     {/* ── Need Master Password ───────────────────────── */}
                     {phase === PHASE.NEED_MASTER && (
                         <motion.div key="master" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 space-y-5">
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 space-y-5">
                             <div className="text-center">
-                                <div className="w-12 sm:w-14 h-12 sm:h-14 bg-violet-500/20 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-violet-400/20">
-                                    <Lock size={20} className="sm:size-[24px] text-violet-400" />
+                                <div className="w-14 h-14 bg-violet-500/20 rounded-2xl flex items-center justify-center mb-4 mx-auto border border-violet-400/20">
+                                    <Lock size={24} className="text-violet-400" />
                                 </div>
-                                <h2 className="text-lg sm:text-xl font-bold text-white">Access Granted!</h2>
-                                <p className="text-white/50 text-xs sm:text-sm mt-1">
+                                <h2 className="text-xl font-bold text-white">Access Granted!</h2>
+                                <p className="text-white/50 text-sm mt-1">
                                     Enter <span className="font-bold text-white">{ownerName}'s</span> master password to decrypt their vault
                                 </p>
                             </div>

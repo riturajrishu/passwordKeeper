@@ -72,17 +72,17 @@ export default function Sidebar({ isOpen, onClose }) {
     const sidebarInner = (
         <div className="flex flex-col h-full">
             {/* Brand */}
-            <div className={clsx('px-4 sm:px-5 py-4 sm:py-5 border-b border-border/50 shrink-0 flex items-center gap-2.5 sm:gap-3', isCollapsed && 'justify-center px-3')}>
+            <div className={clsx('px-5 py-5 border-b border-border/50 shrink-0 flex items-center gap-3', isCollapsed && 'justify-center px-3')}>
                 <div className="relative shrink-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg text-white shrink-0">
-                        <Shield size={16} className="sm:size-[18px]" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg text-white shrink-0">
+                        <Shield size={18} />
                     </div>
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background animate-pulse" />
                 </div>
                 {!isCollapsed && (
                     <div className="min-w-0">
-                        <span className="font-extrabold text-[15px] sm:text-base tracking-tight leading-none block">Keeper<span className="text-primary">X</span></span>
-                        <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-muted-foreground/80 mt-1 block">Enterprise Vault</span>
+                        <span className="font-extrabold text-base tracking-tight leading-none block">Keeper<span className="text-primary">X</span></span>
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/80 mt-1 block">Enterprise Vault</span>
                     </div>
                 )}
             </div>
@@ -98,7 +98,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             end={to === '/'}
                             onClick={onClose}
                             className={({ isActive }) => clsx(
-                                'flex items-center gap-3 font-semibold text-[13px] sm:text-sm rounded-xl transition-all relative group',
+                                'flex items-center gap-3 font-semibold text-sm rounded-xl transition-all relative group',
                                 isCollapsed ? 'justify-center p-2.5' : 'px-3 py-2.5',
                                 isActive
                                     ? 'bg-primary/10 text-primary border border-primary/10'
@@ -115,7 +115,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                     {/* Active Indicator bar */}
                                     <div className={clsx(
                                         "absolute left-0 w-1 bg-primary rounded-full transition-all duration-300",
-                                        isActive ? "h-5 sm:h-6" : "h-0"
+                                        isActive ? "h-6" : "h-0"
                                     )} />
 
                                     {badgeVal != null && !isCollapsed && (
