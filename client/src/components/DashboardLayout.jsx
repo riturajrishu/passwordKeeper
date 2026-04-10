@@ -152,7 +152,7 @@ const DashboardLayout = () => {
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col relative overflow-hidden bg-background">
                 {/* Global Header */}
-                <header className="h-20 border-b border-border flex items-center justify-between px-4 lg:px-8 glass-panel sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+                <header className="h-16 lg:h-20 border-b border-border flex items-center justify-between px-4 lg:px-8 glass-panel sticky top-0 z-40 bg-background/80 backdrop-blur-md">
                     <div className="flex items-center gap-3 flex-1 lg:hidden">
                         <button 
                             className="p-2 text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors"

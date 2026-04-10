@@ -239,18 +239,18 @@ export default function ShareModal({ isOpen, onClose, item }) {
                         className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
                     >
                         <div
-                            className="glass-panel border border-border rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden"
+                            className="glass-panel border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none"
                             onClick={e => e.stopPropagation()}
                         >
                             {/* ── Modal Header ─────────────────────── */}
-                            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-border/50">
+                            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-border/50">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                        <Share2 size={16} />
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                        <Share2 size={14} className="sm:size-4" />
                                     </div>
                                     <div>
-                                        <h2 className="font-bold text-base">Secure Share</h2>
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                                        <h2 className="font-bold text-sm sm:text-base">Secure Share</h2>
+                                        <p className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
                                             {item?.appName || 'Vault Item'}
                                         </p>
                                     </div>
@@ -258,14 +258,14 @@ export default function ShareModal({ isOpen, onClose, item }) {
                                 <button
                                     id="share-modal-close"
                                     onClick={onClose}
-                                    className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                    className="p-1.5 sm:p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                                 >
-                                    <X size={18} />
+                                    <X size={16} className="sm:size-[18px]" />
                                 </button>
                             </div>
 
                             {/* ── Tabs ─────────────────────────────── */}
-                            <div className="flex border-b border-border/50 px-6">
+                            <div className="flex border-b border-border/50 px-4 sm:px-6">
                                 {[
                                     { id: 'create', label: 'Create Link' },
                                     { id: 'links',  label: 'Active Links' }
@@ -274,7 +274,7 @@ export default function ShareModal({ isOpen, onClose, item }) {
                                         key={tab.id}
                                         id={`share-tab-${tab.id}`}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors ${
+                                        className={`px-3 sm:px-4 py-2 sm:py-3 text-[13px] sm:text-sm font-bold border-b-2 transition-colors ${
                                             activeTab === tab.id
                                                 ? 'border-primary text-primary'
                                                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -295,7 +295,7 @@ export default function ShareModal({ isOpen, onClose, item }) {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 10 }}
-                                        className="p-6 space-y-5"
+                                        className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto"
                                     >
                                         {!generatedLink ? (
                                             <>

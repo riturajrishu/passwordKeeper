@@ -7,6 +7,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      screens: {
+        'xs': '400px',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

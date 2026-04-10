@@ -76,6 +76,8 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   /* Spatial Aurora Environment Arrays */
@@ -241,6 +243,14 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Safe Area Utilities for mobile */
+  .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+      padding-top: env(safe-area-inset-top);
   }
 }
 

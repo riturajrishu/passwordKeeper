@@ -327,20 +327,20 @@ export default function ItemCard({
             className="flex flex-col bg-card border border-border/60 hover:border-primary/40 rounded-2xl transition-all group overflow-hidden shadow-premium hover:shadow-2xl"
         >
             {/* Header */}
-            <div className="p-5 sm:p-6 pb-4">
+            <div className="p-4 sm:p-6 pb-3 sm:pb-4">
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="w-12 h-12 shrink-0 rounded-2xl bg-muted border border-border shadow-sm flex items-center justify-center relative overflow-hidden group-hover:border-primary/20 transition-colors">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-2xl bg-muted border border-border shadow-sm flex items-center justify-center relative overflow-hidden group-hover:border-primary/20 transition-colors">
                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                             {domain && !logoError ? (
                                 <img 
                                     src={`https://www.google.com/s2/favicons?domain=${domain?.replace(/^www\./, '')}&sz=128`} 
                                     alt={item.appName}
-                                    className="w-8 h-8 object-contain drop-shadow-sm z-10"
+                                    className="w-6 h-6 sm:w-8 sm:h-8 object-contain drop-shadow-sm z-10"
                                     onError={() => setLogoError(true)}
                                 />
                             ) : (
-                                <div className="z-10">{getIcon()}</div>
+                                <div className="z-10 scale-90 sm:scale-100">{getIcon()}</div>
                             )}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -359,16 +359,16 @@ export default function ItemCard({
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
+                    <div className="flex items-center gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-all transform lg:translate-y-1 lg:group-hover:translate-y-0">
                         <button
-                            onClick={() => toggleFavorite(item)}
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}
                             className={clsx('p-2 rounded-xl transition-all hover:bg-muted', item.isFavorite ? 'text-yellow-500 bg-yellow-500/5' : 'text-muted-foreground/60 hover:text-foreground')}
                             title="Favorite"
                         >
                             <Star size={16} fill={item.isFavorite ? 'currentColor' : 'none'} />
                         </button>
                         <button
-                            onClick={() => onDelete(item._id)}
+                            onClick={(e) => { e.stopPropagation(); onDelete(item._id); }}
                             className="p-2 rounded-xl text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/5 transition-all"
                             title="Delete"
                         >
@@ -379,7 +379,7 @@ export default function ItemCard({
             </div>
 
             {/* Dynamic Body */}
-            <div className="px-5 sm:px-6 pb-4 flex-1">
+            <div className="px-4 sm:px-6 pb-4 flex-1 min-w-0">
                 {type === 'LOGIN' && renderLoginContent()}
                 {type === 'CREDIT_CARD' && renderCreditCardContent()}
                 {type === 'IDENTITY' && renderIdentityContent()}
@@ -401,31 +401,31 @@ export default function ItemCard({
             )}
 
             {/* Footer */}
-            <div className="px-5 sm:px-6 py-4 bg-muted/30 border-t border-border mt-auto flex items-center justify-between gap-2 overflow-hidden">
-                <div className="flex items-center gap-3">
+            <div className="px-4 sm:px-6 py-4 bg-muted/30 border-t border-border mt-auto flex items-center justify-between gap-2 overflow-hidden">
+                <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => onEdit(item)}
-                        className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                        className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors whitespace-nowrap"
                     >
-                        <Edit3 size={12} /> Edit
+                        <Edit3 size={12} /> <span className="hidden xs:inline">Edit</span>
                     </button>
-                    <div className="w-px h-3 bg-border" />
+                    <div className="w-px h-3 bg-border shrink-0" />
                     <button
                         onClick={() => onShare && onShare(item)}
-                        className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                        className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors whitespace-nowrap"
                     >
-                        <Share2 size={12} /> Share
+                        <Share2 size={12} /> <span className="hidden xs:inline">Share</span>
                     </button>
                     {item.url && (
                         <>
-                            <div className="w-px h-3 bg-border" />
+                            <div className="w-px h-3 bg-border shrink-0" />
                             <a
                                 href={item.url.startsWith('http') ? item.url : `https://${item.url}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                                className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors whitespace-nowrap"
                             >
-                                <ExternalLink size={12} /> Visit
+                                <ExternalLink size={12} /> <span className="hidden xs:inline">Visit</span>
                             </a>
                         </>
                     )}

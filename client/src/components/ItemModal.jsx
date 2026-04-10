@@ -207,13 +207,13 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="glass-panel border border-border w-full max-w-lg rounded-3xl shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[90vh]"
+                className="glass-panel border border-border w-full max-w-lg rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden"
             >
                 <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
 
                     {/* ── Header ─────────────────────────────────── */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 shrink-0">
-                        <h2 className="text-lg sm:text-xl font-bold">
+                    <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border/50 shrink-0">
+                        <h2 className="text-base sm:text-xl font-bold">
                             {editingItem ? 'Edit Vault Item' : 'New Vault Item'}
                         </h2>
                         <button
@@ -226,7 +226,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                     </div>
 
                     {/* ── Scrollable Body ─────────────────────────── */}
-                    <div className="overflow-y-auto custom-scrollbar flex-1 px-5 py-5 space-y-5">
+                    <div className="overflow-y-auto custom-scrollbar flex-1 px-4 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-5">
 
                         {/* Type selector (create only) */}
                         {!editingItem && (
@@ -531,11 +531,11 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                     </div>
 
                     {/* ── Footer ─────────────────────────────────── */}
-                    <div className="px-5 py-4 border-t border-border/50 flex justify-end gap-3 shrink-0 items-center bg-black/5 dark:bg-white/5">
+                    <div className="px-4 sm:px-5 py-3 sm:py-4 border-t border-border/50 flex justify-end gap-2 sm:gap-3 shrink-0 items-center bg-black/5 dark:bg-white/5 mt-auto">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-5 py-2.5 font-bold text-muted-foreground hover:text-foreground transition-colors text-sm"
+                            className="px-4 sm:px-5 py-2 sm:py-2.5 font-bold text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm"
                         >
                             Cancel
                         </button>
