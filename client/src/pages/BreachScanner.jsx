@@ -119,7 +119,7 @@ export default function BreachScanner() {
     const cleanCount = results.filter(r => r.count === 0).length;
 
     return (
-        <div className="p-4 lg:p-8 max-w-6xl mx-auto space-y-8">
+        <div className="p-4 lg:p-8 pb-12 max-w-6xl mx-auto space-y-8">
             <header>
                 <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
                     <Radar className={isScanning ? "animate-spin-slow text-primary" : "text-muted-foreground"} size={28} />
@@ -215,13 +215,13 @@ export default function BreachScanner() {
 
                     {/* Live Results Stream */}
                     <div className="lg:col-span-8">
-                        <div className="glass-panel rounded-3xl border border-border overflow-hidden flex flex-col h-[500px]">
+                        <div className="glass-panel rounded-3xl border border-border overflow-hidden flex flex-col h-[400px] lg:h-[500px]">
                             <div className="p-4 border-b border-border/50 bg-black/5 dark:bg-white/5 flex items-center justify-between shadow-sm z-10">
                                 <h3 className="font-bold text-sm uppercase tracking-widest">Scan Activity Log</h3>
                                 {isScanning && <div className="flex items-center gap-2"><Loader2 size={14} className="animate-spin text-primary" /><span className="text-xs text-primary font-mono animate-pulse">Processing...</span></div>}
                             </div>
                             
-                            <div className="flex-1 overflow-y-auto w-full p-4 space-y-3 custom-scrollbar flex flex-col-reverse">
+                            <div className="flex-1 overflow-y-auto w-full p-4 pb-8 space-y-3 custom-scrollbar flex flex-col-reverse">
                                 {results.length === 0 && !isScanning && !scanComplete ? (
                                     <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50 opacity-50">
                                         <Radar size={64} className="mb-4" />
