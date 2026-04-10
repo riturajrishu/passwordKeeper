@@ -83,6 +83,10 @@ router.post('/contacts', verifyToken, async (req, res) => {
 
         await contact.save();
 
+        // ── Generate full invite link ─────────────────────────────────────
+        const baseUrl = process.env.CLIENT_URL || (req.get('origin') || `${req.protocol}://${req.get('host')}`);
+        const inviteLink = `${baseUrl}/emergency/invite/${inviteToken}`;
+
         return res.status(201).json({
             message: 'Emergency contact added successfully',
             contact: {
@@ -93,7 +97,7 @@ router.post('/contacts', verifyToken, async (req, res) => {
                 status: contact.status,
                 inviteToken,
                 // Full invite URL — in production this would be emailed
-                inviteLink: `${process.env.CLIENT_URL || 'http://localhost:5173'}/emergency/invite/${inviteToken}`,
+                inviteLink,
                 inviteExpiresAt: contact.inviteExpiresAt,
                 createdAt: contact.createdAt
             }
@@ -128,7 +132,7 @@ router.get('/contacts', verifyToken, async (req, res) => {
             status: c.status,
             // Only include invite link for pending contacts (not yet accepted)
             inviteLink: c.status === 'pending_invite'
-                ? `${process.env.CLIENT_URL || 'http://localhost:5173'}/emergency/invite/${c.inviteToken}`
+                ? `${process.env.CLIENT_URL || (req.get('origin') || `${req.protocol}://${req.get('host')}`)}/emergency/invite/${c.inviteToken}`
                 : null,
             inviteExpiresAt: c.inviteExpiresAt,
             inviteAcceptedAt: c.inviteAcceptedAt,
