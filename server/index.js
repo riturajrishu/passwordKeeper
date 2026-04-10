@@ -69,7 +69,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Catch-all route for SPA (MUST be after API routes)
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
