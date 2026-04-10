@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Keeper X</title>
+  <style>
+    :root { --primary: #3b82f6; --bg: #020617; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 16px; width: 320px; height: 480px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent;}
+    h1 { font-size: 1.2rem; color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 8px;}
+    .input-field { width: calc(100% - 24px); padding: 10px 12px; margin-bottom: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; outline: none; }
+    .input-field:focus { border-color: var(--primary); }
+    .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn:hover { background: #2563eb; }
+    #loggedInView { display: none; }
+    .item-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;}
+    .item-card:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+    .item-title { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .item-sub { font-size: 0.75rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    .error { color: #ef4444; font-size: 0.8rem; margin-bottom: 10px; display: none; padding: 8px; background: rgba(239,68,68,0.1); border-radius: 6px;}
+    .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  </style>
+  <script src="crypto-js.min.js"></script>
+</head>
+<body>
+  <h1><span style="font-size: 1.5rem">🛡️</span> Keeper X</h1>
+  
+  <div id="loginView">
+    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">Access your Zero-Knowledge Vault</p>
+    <div id="errorMsg" class="error"></div>
+    <input type="email" id="email" class="input-field" placeholder="Email Address" />
+    <input type="password" id="loginPass" class="input-field" placeholder="Login Password" />
+    <input type="password" id="masterPass" class="input-field" placeholder="Vault Master Password" />
+    <button id="loginBtn" class="btn">Unlock Vault</button>
+  </div>
+
+  <div id="loggedInView">
+    <div class="flex-between">
+        <span id="userEmailDisplay" style="font-size: 0.8rem; color: #94a3b8;"></span>
+        <button id="logoutBtn" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem; font-weight: bold;">Log Out</button>
+    </div>
+    <input type="text" id="searchBox" class="input-field" placeholder="Search logins or URLs..." />
+    <div id="vaultList" style="margin-top: 10px;"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

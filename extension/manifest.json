@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Password Keeper X",
+  "version": "1.0",
+  "description": "Zero-Knowledge Password Manager & Anti-Phishing autofill.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:5000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
