@@ -236,21 +236,21 @@ export default function ShareModal({ isOpen, onClose, item }) {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.94, y: 20 }}
                         transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-none"
                     >
                         <div
-                            className="glass-panel border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden flex flex-col max-h-[90vh] sm:max-h-none"
+                            className="glass-panel border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md pointer-events-auto overflow-hidden flex flex-col max-h-[100dvh] sm:max-h-none"
                             onClick={e => e.stopPropagation()}
                         >
-                            {/* ── Modal Header ─────────────────────── */}
-                            <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-border/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                        <Share2 size={14} className="sm:size-4" />
+                             {/* ── Modal Header ─────────────────────── */}
+                            <div className="flex items-center justify-between px-4 sm:px-6 pt-3.5 sm:pt-6 pb-2.5 sm:pb-4 border-b border-border/50">
+                                <div className="flex items-center gap-2.5 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
+                                        <Share2 size={13} className="sm:size-4" />
                                     </div>
-                                    <div>
-                                        <h2 className="font-bold text-sm sm:text-base">Secure Share</h2>
-                                        <p className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">
+                                    <div className="min-w-0">
+                                        <h2 className="font-bold text-[13px] sm:text-base truncate">Secure Share</h2>
+                                        <p className="text-[8px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest truncate max-w-[120px] sm:max-w-none">
                                             {item?.appName || 'Vault Item'}
                                         </p>
                                     </div>
@@ -274,7 +274,7 @@ export default function ShareModal({ isOpen, onClose, item }) {
                                         key={tab.id}
                                         id={`share-tab-${tab.id}`}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`px-3 sm:px-4 py-2 sm:py-3 text-[13px] sm:text-sm font-bold border-b-2 transition-colors ${
+                                        className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 transition-colors ${
                                             activeTab === tab.id
                                                 ? 'border-primary text-primary'
                                                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -409,20 +409,22 @@ export default function ShareModal({ isOpen, onClose, item }) {
                                                 </div>
 
                                                 {/* Link display */}
-                                                <div className="p-3 bg-black/5 dark:bg-white/5 border border-border/50 rounded-2xl">
+                                                <div className="p-3.5 bg-black/5 dark:bg-white/5 border border-border/50 rounded-2xl">
                                                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Your Secure Link</p>
-                                                    <p className="text-xs font-mono text-muted-foreground break-all leading-relaxed line-clamp-3 mb-3">
+                                                    <p className="text-[11px] sm:text-xs font-mono text-muted-foreground break-all leading-relaxed line-clamp-3 mb-4">
                                                         {generatedLink}
                                                     </p>
-                                                    <div className="flex gap-2">
-                                                        <CopyLinkBtn link={generatedLink} />
+                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                        <div className="flex-1">
+                                                            <CopyLinkBtn link={generatedLink} />
+                                                        </div>
                                                         <a
                                                             href={generatedLink}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground border border-border hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                                                            className="flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground border border-border hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                                                         >
-                                                            <ExternalLink size={12} /> Preview
+                                                            <ExternalLink size={12} /> Preview Link
                                                         </a>
                                                     </div>
                                                 </div>

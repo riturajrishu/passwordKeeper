@@ -233,19 +233,19 @@ export default function SharedView() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center"
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-12 text-center"
                         >
-                            <div className="relative mx-auto w-16 h-16 mb-6">
+                            <div className="relative mx-auto w-12 h-12 sm:w-16 sm:h-16 mb-6">
                                 <div className="absolute inset-0 rounded-full border-2 border-violet-500/20" />
                                 <div className="absolute inset-0 rounded-full border-t-2 border-violet-400 animate-spin" />
-                                <div className="absolute inset-3 flex items-center justify-center">
-                                    {phase === 'decrypting' ? <Unlock size={20} className="text-violet-400" /> : <Lock size={20} className="text-violet-400/50" />}
+                                <div className="absolute inset-2.5 sm:inset-3 flex items-center justify-center">
+                                    {phase === 'decrypting' ? <Unlock size={18} className="text-violet-400 sm:size-5" /> : <Lock size={18} className="text-violet-400/50 sm:size-5" />}
                                 </div>
                             </div>
-                            <p className="text-white/70 font-semibold">
+                            <p className="text-white/70 font-semibold text-sm sm:text-base">
                                 {phase === 'decrypting' ? 'Decrypting securely…' : 'Verifying link…'}
                             </p>
-                            <p className="text-white/30 text-xs mt-1">
+                            <p className="text-white/30 text-[10px] sm:text-xs mt-1">
                                 {phase === 'decrypting' ? 'Decryption happens only in your browser' : 'Checking token validity'}
                             </p>
                         </motion.div>
@@ -258,7 +258,7 @@ export default function SharedView() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
-                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8"
+                            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8"
                         >
                             <div className="w-14 h-14 bg-violet-500/20 rounded-2xl flex items-center justify-center mb-5 mx-auto">
                                 <Lock size={24} className="text-violet-400" />
@@ -283,7 +283,7 @@ export default function SharedView() {
                                         placeholder="Enter 4-8 digit PIN"
                                         maxLength={8}
                                         autoFocus
-                                        className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-3.5 text-white text-center text-2xl font-mono tracking-[0.5em] placeholder:text-white/20 placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-violet-400/60 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                                        className="w-full bg-white/10 border border-white/20 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 text-white text-center text-xl sm:text-2xl font-mono tracking-[0.3em] sm:tracking-[0.5em] placeholder:text-white/20 placeholder:text-xs sm:placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-violet-400/60 focus:ring-2 focus:ring-violet-500/20 transition-all"
                                     />
                                     {pinError && (
                                         <p className="text-red-400 text-xs text-center mt-2 font-semibold">{pinError}</p>

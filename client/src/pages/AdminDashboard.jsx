@@ -133,11 +133,11 @@ export default function AdminDashboard() {
     );
 
     return (
-        <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight">Super <span className="text-primary">Admin</span></h1>
-                    <p className="text-muted-foreground text-sm font-medium">Manage users, security policies, and support cases.</p>
+                    <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Super <span className="text-primary">Admin</span></h1>
+                    <p className="text-muted-foreground text-xs sm:text-sm font-medium">Manage users, security policies, and support cases.</p>
                 </div>
             </header>
 
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Content Area */}
-            <div className="glass-panel border border-border rounded-3xl p-6">
+            <div className="glass-panel border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6">
                 
                 {activeTab === 'users' && (
                     <>
@@ -185,11 +185,11 @@ export default function AdminDashboard() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b border-border/50 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                                        <th className="pb-3 px-4 text-center w-12">Det.</th>
-                                        <th className="pb-3 px-4">User</th>
-                                        <th className="pb-3 px-4">Role</th>
-                                        <th className="pb-3 px-4 text-right">Actions</th>
+                                    <tr className="border-b border-border/50 text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                        <th className="pb-3 px-2 sm:px-4 text-center w-10 sm:w-12">Det.</th>
+                                        <th className="pb-3 px-2 sm:px-4">User</th>
+                                        <th className="pb-3 px-2 sm:px-4 hidden sm:table-cell">Role</th>
+                                        <th className="pb-3 px-2 sm:px-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -209,33 +209,41 @@ export default function AdminDashboard() {
                                                         <Eye size={16} />
                                                     </button>
                                                 </td>
-                                                <td className="py-4 px-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground font-bold shadow-sm">
+                                                <td className="py-3 sm:py-4 px-2 sm:px-4">
+                                                    <div className="flex items-center gap-2 sm:gap-3">
+                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground text-xs sm:text-sm font-bold shadow-sm shrink-0">
                                                             {(user.name || user.email).charAt(0).toUpperCase()}
                                                         </div>
-                                                        <div>
-                                                            <div className="font-bold text-sm text-foreground">{user.name || 'No Name'}</div>
-                                                            <div className="text-xs text-muted-foreground">{user.email}</div>
+                                                        <div className="min-w-0">
+                                                            <div className="font-bold text-xs sm:text-sm text-foreground truncate max-w-[120px] sm:max-w-none">{user.name || 'No Name'}</div>
+                                                            <div className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[150px] sm:max-w-none">{user.email}</div>
+                                                            <div className="sm:hidden mt-1">
+                                                                <span className={`px-2 py-0.5 text-[8px] font-bold rounded-full uppercase tracking-wider ${
+                                                                    user.role === 'superadmin' ? 'bg-purple-500/20 text-purple-500' :
+                                                                    user.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-border text-foreground opacity-70'
+                                                                }`}>
+                                                                    {user.role}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="py-4 px-4">
-                                                    <span className={`px-2.5 py-1 left-2 text-[10px] font-bold rounded-full uppercase tracking-wider ${
+                                                <td className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
+                                                    <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${
                                                         user.role === 'superadmin' ? 'bg-purple-500/20 text-purple-500' :
                                                         user.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-border text-foreground opacity-70'
                                                     }`}>
                                                         {user.role}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 px-4 text-right">
+                                                <td className="py-3 sm:py-4 px-2 sm:px-4 text-right">
                                                     {user._id !== currentUser.uid && (
                                                         <button
                                                             onClick={() => setDeleteModal({ show: true, targetUser: user, confirmation: '' })}
-                                                            className="p-2 ml-auto text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-red-500/30"
+                                                            className="p-1.5 sm:p-2 ml-auto text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-red-500/30"
                                                             title="Delete User"
                                                         >
-                                                            <Trash2 size={16} />
+                                                            <Trash2 size={14} className="sm:size-4" />
                                                         </button>
                                                     )}
                                                 </td>

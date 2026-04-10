@@ -212,8 +212,8 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                 <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
 
                     {/* ── Header ─────────────────────────────────── */}
-                    <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border/50 shrink-0">
-                        <h2 className="text-base sm:text-xl font-bold">
+                    <div className="flex items-center justify-between px-4 sm:px-5 py-2.5 sm:py-4 border-b border-border/50 shrink-0">
+                        <h2 className="text-sm sm:text-lg font-bold">
                             {editingItem ? 'Edit Vault Item' : 'New Vault Item'}
                         </h2>
                         <button
@@ -226,7 +226,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                     </div>
 
                     {/* ── Scrollable Body ─────────────────────────── */}
-                    <div className="overflow-y-auto custom-scrollbar flex-1 px-4 sm:px-5 py-4 sm:py-5 space-y-4 sm:space-y-5">
+                    <div className="overflow-y-auto custom-scrollbar flex-1 px-3 sm:px-5 py-3 sm:py-5 space-y-4 sm:space-y-5">
 
                         {/* Type selector (create only) */}
                         {!editingItem && (
@@ -237,7 +237,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                                         type="button"
                                         onClick={() => setItemType(type.id)}
                                         className={clsx(
-                                            'flex-1 px-2.5 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap',
+                                            'flex-1 px-3 sm:px-2.5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all whitespace-nowrap',
                                             itemType === type.id
                                                 ? 'bg-background shadow-sm text-primary'
                                                 : 'text-muted-foreground hover:text-foreground'
@@ -531,7 +531,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                     </div>
 
                     {/* ── Footer ─────────────────────────────────── */}
-                    <div className="px-4 sm:px-5 py-3 sm:py-4 border-t border-border/50 flex justify-end gap-2 sm:gap-3 shrink-0 items-center bg-black/5 dark:bg-white/5 mt-auto">
+                    <div className="px-4 sm:px-5 py-3 sm:py-4 border-t border-border/50 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 shrink-0 sm:items-center bg-black/5 dark:bg-white/5 mt-auto">
                         <button
                             type="button"
                             onClick={onClose}
@@ -542,7 +542,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                         <motion.button
                             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                             type="submit"
-                            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 text-sm"
+                            className="bg-primary text-primary-foreground px-6 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg shadow-primary/20 text-xs sm:text-sm"
                         >
                             {editingItem ? 'Save Changes' : 'Create Secure Item'}
                         </motion.button>

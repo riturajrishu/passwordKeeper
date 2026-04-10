@@ -188,23 +188,25 @@ export default function EmergencyAccess() {
 
     // ══════════════════════════════════════════════════════════════════
     return (
-        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-5 sm:space-y-8 pb-16">
+        <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-8 pb-20">
 
             {/* ── Header ────────────────────────────────────────────── */}
-            <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500/80 to-amber-500/80 flex items-center justify-center">
+            <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500/80 to-amber-500/80 flex items-center justify-center shrink-0">
                             <ShieldAlert size={16} className="text-white" />
                         </div>
-                        <h1 className="text-xl font-black text-foreground">Emergency Access</h1>
+                        <h1 className="text-xl sm:text-2xl font-black text-foreground">Emergency Access</h1>
                     </div>
-                    <p className="text-sm text-muted-foreground">Configure trusted contacts for your <em>Dead Man's Switch</em>. If you're inactive for a set period, they can request access to your vault.</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        Configure trusted contacts for your <em className="text-foreground">Dead Man's Switch</em>. If you're inactive for a set period, they can request access to your vault.
+                    </p>
                 </div>
                 <button
                     id="emergency-refresh-btn"
                     onClick={loadContacts}
-                    className="p-2 rounded-xl bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0"
+                    className="self-end sm:self-start p-2.5 rounded-xl bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0"
                     title="Refresh"
                 >
                     <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
@@ -213,15 +215,15 @@ export default function EmergencyAccess() {
 
             {/* ── Info Banner ───────────────────────────────────────── */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-                className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex gap-3">
-                <Info size={16} className="text-blue-400 mt-0.5 shrink-0" />
-                <div className="space-y-1">
-                    <p className="text-xs font-bold text-blue-600 dark:text-blue-300">How Does This Work?</p>
-                    <div className="text-[11px] text-blue-600/80 dark:text-blue-200/60 space-y-1">
-                        <p>1. Add a trusted contact (family/colleague) → they receive an invite link.</p>
-                        <p>2. After the set inactivity period, they can "request access".</p>
-                        <p>3. You get a notification and have 24 hours to DENY. Otherwise, access is granted.</p>
-                        <p>4. Zero-knowledge preserved — your master key never touches the server.</p>
+                className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex gap-3.5">
+                <Info size={16} className="text-primary mt-0.5 shrink-0" />
+                <div className="space-y-1.5">
+                    <p className="text-xs font-bold text-primary">How Does This Work?</p>
+                    <div className="text-[11px] text-muted-foreground leading-relaxed space-y-1.5">
+                        <p><span className="font-bold text-foreground">1. Add a trusted contact</span> (family/colleague) → they receive an invite link.</p>
+                        <p><span className="font-bold text-foreground">2. After the inactivity period</span>, they can "request access".</p>
+                        <p><span className="font-bold text-foreground">3. 24-hour Deny Window.</span> You have 24 hours to block any request.</p>
+                        <p><span className="font-bold text-foreground">4. Zero-knowledge.</span> Your master key never touches the server.</p>
                     </div>
                 </div>
             </motion.div>
@@ -307,14 +309,14 @@ export default function EmergencyAccess() {
                             </select>
                         </div>
 
-                        <div className="flex gap-3 pt-1">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-1">
                             <button type="button" onClick={() => { setShowAddForm(false); setFormErrors({}); }}
-                                className="flex-1 py-2.5 rounded-xl border border-border text-muted-foreground text-sm font-semibold hover:bg-muted transition-all">
+                                className="order-2 sm:order-1 flex-1 py-3 rounded-xl border border-border text-muted-foreground text-sm font-semibold hover:bg-muted transition-all">
                                 Cancel
                             </button>
                             <motion.button type="submit" id="emergency-add-submit"
                                 whileTap={{ scale: 0.97 }} disabled={submitting}
-                                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 transition-all">
+                                className="order-1 sm:order-2 flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 transition-all">
                                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
                                 {submitting ? 'Adding…' : 'Add Contact'}
                             </motion.button>
@@ -374,41 +376,20 @@ export default function EmergencyAccess() {
                                     <p className={`text-xs font-bold ${contact.daysUntilEligible === 0 ? 'text-destructive' : 'text-foreground'}`}>
                                         {contact.daysUntilEligible === 0 ? 'NOW' : `${contact.daysUntilEligible} days`}
                                     </p>
-                                </div>
-                            </div>
-
-                            {/* Invite link for pending contacts */}
-                            {contact.status === 'pending_invite' && contact.inviteLink && (
-                                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-2">
-                                    <p className="text-xs font-bold text-amber-600 dark:text-amber-300">📨 Share this invite link with {contact.contactName}:</p>
-                                    <div className="flex items-center gap-2">
-                                        <code className="flex-1 text-[10px] text-muted-foreground bg-muted/80 border border-border px-2 py-1.5 rounded-lg font-mono truncate">
-                                            {contact.inviteLink}
-                                        </code>
-                                        <CopyLinkBtn text={contact.inviteLink} />
-                                    </div>
-                                    {contact.inviteExpiresAt && (
-                                        <p className="text-[10px] text-muted-foreground/60">
-                                            Expires: {new Date(contact.inviteExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Action buttons */}
-                            <div className="flex items-center gap-2 pt-1">
+                               {/* Action buttons */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
                                  {/* Share Key button — for accepted contacts without shared key */}
                                  {contact.status === 'invite_accepted' && !contact.hasSharedKey && (
                                      <motion.button
                                          id={`emergency-share-${contact.id}`}
                                          whileTap={{ scale: 0.97 }}
                                          onClick={() => { setActiveContact(contact); setShowShareModal(true); }}
-                                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/10"
+                                         className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/10"
                                      >
-                                         <Lock size={11} /> Securely Share Access
+                                         <Lock size={12} /> Securely Share Access
                                      </motion.button>
                                  )}
-
+ 
                                  {/* Deny button — only for access_requested status */}
                                 {contact.status === 'access_requested' && (
                                     <motion.button
@@ -416,7 +397,26 @@ export default function EmergencyAccess() {
                                         whileTap={{ scale: 0.97 }}
                                         onClick={() => handleDeny(contact.id, contact.contactName)}
                                         disabled={denyingId === contact.id}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold hover:bg-destructive/20 transition-all disabled:opacity-50"
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-2.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold hover:bg-destructive/20 transition-all disabled:opacity-50"
+                                    >
+                                        {denyingId === contact.id ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={12} />}
+                                        Deny Access
+                                    </motion.button>
+                                )}
+ 
+                                {/* Remove contact */}
+                                <button
+                                    id={`emergency-remove-${contact.id}`}
+                                    onClick={() => handleRemove(contact.id, contact.contactName)}
+                                    disabled={removingId === contact.id}
+                                    className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-muted/50 border border-border text-muted-foreground text-xs font-semibold hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all disabled:opacity-50"
+                                    title="Remove contact"
+                                >
+                                    {removingId === contact.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                                    <span className="sm:hidden">Remove Contact</span>
+                                </button>
+                            </div>
+lassName="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold hover:bg-destructive/20 transition-all disabled:opacity-50"
                                     >
                                         {denyingId === contact.id ? <Loader2 size={11} className="animate-spin" /> : <XCircle size={11} />}
                                         Deny Access
