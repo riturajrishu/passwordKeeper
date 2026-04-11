@@ -7,14 +7,18 @@ import {
     ShieldCheck, AlertTriangle, ShieldAlert, CheckCircle2,
     ShieldEllipsis, Zap, Clock, Key, CreditCard,
     Wifi, FileText, UserCircle, KeyRound, ShieldOff,
-    RefreshCw, Info, Lock, HardDrive
+    RefreshCw, Info, Lock, HardDrive, AlertOctagon,
+    ChevronDown, ChevronUp, Edit3
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/useAuthStore';
-import { fetchVaultItems } from '../lib/api';
-import { decryptData } from '../lib/crypto';
+import useToastStore from '../store/useToastStore';
+import useNotificationStore from '../store/useNotificationStore';
+import { fetchVaultItems, updateVaultItem, createVaultItem } from '../lib/api';
+import { decryptData, encryptData } from '../lib/crypto';
 import clsx from 'clsx';
 import ActivityHeatmap from '../components/ActivityHeatmap';
+import ItemModal from '../components/ItemModal';
 
 // ─── Password strength scorer (0-5) ─────────────────────────────────────────
 const getStrength = (pwd) => {
@@ -73,50 +77,82 @@ const daysOld = (dateStr) => {
 
 const SecurityAudit = () => {
     const masterKey = useAuthStore(s => s.masterKey);
+    const addToast = useToastStore(s => s.addToast);
+    const addNotification = useNotificationStore(s => s.addNotification);
+
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const loadItems = async () => {
-            try {
-                const rawItems = await fetchVaultItems();
-                const decrypted = rawItems
-                    // 🔒 HARDENED FILTER: Exclude anything that is deleted, or marked for deletion
-                    .filter(i => i.isDeleted === false || i.isDeleted === undefined || i.isDeleted === null)
-                    .filter(i => !i.isDeleted) 
-                    .map(item => {
-                        const payload = decryptData(item.encryptedBlob, masterKey);
-                        if (!payload) return null;
-                        return {
-                            _id: item._id,
-                            // ✅ BUG FIX: preserve itemType from outer DB record, not just decrypted blob
-                            itemType: item.itemType || payload.itemType || 'LOGIN',
-                            category: item.category || 'Uncategorized',
-                            isFavorite: item.isFavorite,
-                            tags: item.tags || [],
-                            createdAt: item.createdAt,
-                            updatedAt: item.updatedAt,
-                            passwordHistory: item.passwordHistory || [],
-                            ...payload,
-                        };
-                    })
-                    .filter(Boolean);
-                setItems(decrypted);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadItems();
+    const [expandedLogIndex, setExpandedLogIndex] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+
+    const loadItems = React.useCallback(async () => {
+        try {
+            const rawItems = await fetchVaultItems();
+            const decrypted = rawItems
+                .filter(i => i.isDeleted === false || i.isDeleted === undefined || i.isDeleted === null)
+                .filter(i => !i.isDeleted) 
+                .map(item => {
+                    const payload = decryptData(item.encryptedBlob, masterKey);
+                    if (!payload) return null;
+                    return {
+                        _id: item._id,
+                        itemType: item.itemType || payload.itemType || 'LOGIN',
+                        category: item.category || 'Uncategorized',
+                        isFavorite: item.isFavorite,
+                        tags: item.tags || [],
+                        createdAt: item.createdAt,
+                        updatedAt: item.updatedAt,
+                        passwordHistory: item.passwordHistory || [],
+                        ...payload,
+                    };
+                })
+                .filter(Boolean);
+            setItems(decrypted);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     }, [masterKey]);
+
+    useEffect(() => {
+        loadItems();
+    }, [loadItems]);
+
+    const handleSaveItem = async (payload, currentEditingItem) => {
+        const { category, itemType, tags, ...sensitivePayload } = payload;
+        const encryptedBlob = encryptData(sensitivePayload, masterKey);
+        if (!encryptedBlob) return addToast('Encryption failed', 'error');
+
+        try {
+            if (currentEditingItem) {
+                await updateVaultItem(currentEditingItem._id, {
+                    encryptedBlob,
+                    category,
+                    itemType,
+                    tags: tags || [],
+                    isFavorite: currentEditingItem.isFavorite
+                });
+                addToast('Updated successfully', 'success');
+            } else {
+                await createVaultItem(encryptedBlob, category, false, itemType, tags || []);
+                addToast('Saved successfully', 'success');
+            }
+            setIsModalOpen(false);
+            loadItems();
+        } catch (err) {
+            addToast(err.message, 'error');
+        }
+    };
 
     // ─── Core stats ────────────────────────────────────────────────────────
     const stats = useMemo(() => {
         const total = items.length;
         if (total === 0) return {
             score: 100, weak: 0, fair: 0, strong: 0, reused: 0,
-            total: 0, withPassword: 0, missing2fa: 0, oldPasswords: 0
+            total: 0, withPassword: 0, missing2fa: 0, oldPasswords: 0, log: []
         };
 
         const passwordItems = items.filter(i => i.password);
@@ -136,21 +172,47 @@ const SecurityAudit = () => {
         let reused = 0;
         Object.values(pwdMap).forEach(c => { if (c > 1) reused += c; });
 
-        // Missing 2FA: LOGIN items without TOTP secret
-        const missing2fa = items.filter(i => i.itemType === 'LOGIN' && !i.totpSecret).length;
+        const weakItems = passwordItems.filter(i => getStrength(i.password) < 2);
+        const fairItems = passwordItems.filter(i => getStrength(i.password) >= 2 && getStrength(i.password) < 4);
+        const staleItems = passwordItems.filter(i => daysOld(i.updatedAt) > 90);
+        const missing2faItemsOriginal = items.filter(i => i.itemType === 'LOGIN' && !i.totpSecret);
+        const reusedItemsRaw = items.filter(i => i.password && pwdMap[i.password] > 1);
 
-        // Old passwords: password items where updatedAt > 90 days ago
-        const oldPasswords = passwordItems.filter(i => daysOld(i.updatedAt) > 90).length;
+        const missing2fa = missing2faItemsOriginal.length;
+        const oldPasswords = staleItems.length;
 
-        // Score: perfect = 0 weak + 0 reused + all have 2FA
-        const pwdScore = withPassword > 0
-            ? Math.round(((strong + fair * 0.6) / withPassword) * 70)
-            : 70;
-        const faScore = total > 0 ? Math.round(((total - missing2fa) / total) * 20) : 20;
-        const reusedPenalty = reused > 0 ? Math.min(20, reused * 5) : 0;
-        const score = Math.max(0, Math.min(100, pwdScore + faScore - reusedPenalty));
+        let score = 100;
+        const log = [];
 
-        return { score, weak, fair, strong, reused, total, withPassword, missing2fa, oldPasswords };
+        if (weak > 0) {
+            const deduction = Math.min(30, weak * 10);
+            score -= deduction;
+            log.push({ reason: `${weak} Weak Password${weak > 1 ? 's' : ''}`, deduction, color: 'text-red-500', affectedItems: weakItems });
+        }
+        if (fair > 0) {
+            const deduction = Math.min(10, fair * 2);
+            score -= deduction;
+            log.push({ reason: `${fair} Moderate Password${fair > 1 ? 's' : ''}`, deduction, color: 'text-yellow-500', affectedItems: fairItems });
+        }
+        if (oldPasswords > 0) {
+            const deduction = Math.min(15, oldPasswords * 5);
+            score -= deduction;
+            log.push({ reason: `${oldPasswords} Stale Password${oldPasswords > 1 ? 's' : ''} (>90d)`, deduction, color: 'text-orange-400', affectedItems: staleItems });
+        }
+        if (missing2fa > 0) {
+            const deduction = Math.min(25, missing2fa * 5);
+            score -= deduction;
+            log.push({ reason: `${missing2fa} Login${missing2fa > 1 ? 's' : ''} missing 2FA`, deduction, color: 'text-red-500', affectedItems: missing2faItemsOriginal });
+        }
+        if (reused > 0) {
+            const deduction = Math.min(20, reused * 5);
+            score -= deduction;
+            log.push({ reason: `${reused} Reused Password${reused > 1 ? 's' : ''}`, deduction, color: 'text-yellow-500', affectedItems: reusedItemsRaw });
+        }
+
+        score = Math.max(0, score);
+
+        return { score, weak, fair, strong, reused, total, withPassword, missing2fa, oldPasswords, log };
     }, [items]);
 
     // ─── Silent Admin Stats Sync ───────────────────────────────────────────
@@ -285,6 +347,66 @@ const SecurityAudit = () => {
                             </div>
                         ))}
                     </div>
+                    {stats.log.length > 0 && (
+                        <div className="w-full mt-4 sm:mt-5 bg-black/5 dark:bg-white/5 rounded-xl p-3 sm:p-4 border border-border/50 text-left">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5">
+                                <AlertOctagon size={12} className="text-primary"/> AI Analysis Log
+                            </h4>
+                            <div className="space-y-2">
+                                {stats.log.map((entry, idx) => {
+                                    const isExpanded = expandedLogIndex === idx;
+                                    return (
+                                    <div key={idx} className="flex flex-col bg-background/40 border border-border/40 rounded-lg overflow-hidden transition-all">
+                                        <button 
+                                            onClick={() => setExpandedLogIndex(isExpanded ? null : idx)}
+                                            className="flex justify-between items-center text-xs sm:text-sm w-full p-2.5 sm:p-3 hover:bg-white/5 active:bg-white/10 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {isExpanded ? <ChevronUp size={14} className="opacity-50" /> : <ChevronDown size={14} className="opacity-50" />}
+                                                <span className="opacity-80 font-medium">{entry.reason}</span>
+                                            </div>
+                                            <span className={`font-black ${entry.color}`}>-{entry.deduction}</span>
+                                        </button>
+                                        
+                                        <AnimatePresence>
+                                            {isExpanded && entry.affectedItems && entry.affectedItems.length > 0 && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="border-t border-border/40"
+                                                >
+                                                    <div className="p-2 space-y-1.5 max-h-[160px] overflow-y-auto custom-scrollbar">
+                                                        {entry.affectedItems.map(item => {
+                                                            const Icon = TYPE_ICONS[item.itemType]?.Icon || KeyRound;
+                                                            return (
+                                                            <div key={item._id} className="flex flex-wrap xs:flex-nowrap items-center justify-between gap-2 p-2 bg-black/10 dark:bg-white/5 rounded pl-3">
+                                                                <div className="flex items-center gap-2 min-w-0 pr-2">
+                                                                    <Icon size={12} className="opacity-50 shrink-0" />
+                                                                    <span className="text-[11px] font-bold truncate opacity-90">{item.appName || 'Unnamed'}</span>
+                                                                    {item.username && <span className="text-[10px] text-muted-foreground truncate hidden xs:inline pl-1 border-l border-border/50">{item.username}</span>}
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                                                                    className="shrink-0 flex items-center gap-1.5 px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded border border-primary/20 transition-colors text-[10px] font-bold"
+                                                                >
+                                                                    <Edit3 size={10} /> Fix
+                                                                </button>
+                                                            </div>
+                                                        )})}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                )})}
+                                <div className="flex justify-between items-center text-xs sm:text-sm pt-2 mt-2 border-t border-border/50 font-black">
+                                    <span>Final Health Score</span>
+                                    <span className="text-foreground">{stats.score} / 100</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* Strength Distribution Pie */}
@@ -567,6 +689,21 @@ const SecurityAudit = () => {
                     />
                 </div>
             </section>
+
+            {/* ── Item Modal for inline fixing ──────────────────────────── */}
+            <AnimatePresence>
+                {isModalOpen && (
+                    <ItemModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setEditingItem(null);
+                        }}
+                        onSave={handleSaveItem}
+                        initialItem={editingItem}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

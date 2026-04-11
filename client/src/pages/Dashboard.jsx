@@ -5,7 +5,8 @@ import useNotificationStore from '../store/useNotificationStore';
 import {
     Plus, Search, Filter, Star, AlertTriangle,
     CheckCircle2, ShieldCheck, Lock, X, KeyRound,
-    CreditCard, Wifi, FileText, UserCircle, Shield
+    CreditCard, Wifi, FileText, UserCircle, Shield,
+    Clock, RefreshCw
 } from 'lucide-react';
 import {
     fetchVaultItems, createVaultItem, updateVaultItem, deleteVaultItem
@@ -17,7 +18,6 @@ import clsx from 'clsx';
 import ItemModal from '../components/ItemModal';
 import ItemCard from '../components/ItemCard';
 import SkeletonGrid from '../components/SkeletonCard';
-import VaultHygiene from '../components/VaultHygiene';
 import ShareModal from '../components/ShareModal';
 
 const CATEGORIES = ['Uncategorized', 'Personal', 'Work', 'Banking', 'Social', 'Gaming'];
@@ -275,11 +275,33 @@ export default function Dashboard() {
     const stats = useMemo(() => {
         const total = items.length;
         const favorites = items.filter(i => i.isFavorite).length;
-        const weak = items.filter(i => i.password && getStrength(i.password) < 2).length;
+        const weak = items.filter(i => i.password && getStrength(i.password) < 3).length;
         const with2fa = items.filter(i => i.totpSecret).length;
         const loginCount = items.filter(i => i.itemType === 'LOGIN').length;
         const cardCount = items.filter(i => i.itemType === 'CREDIT_CARD').length;
-        return { total, favorites, weak, with2fa, loginCount, cardCount };
+
+        const pwdCounts = {};
+        let reused = 0;
+        let stale = 0;
+
+        items.forEach(i => {
+            if (i.password) {
+                pwdCounts[i.password] = (pwdCounts[i.password] || 0) + 1;
+                const dateStr = i.updatedAt || i.createdAt;
+                if (dateStr) {
+                    const diff = Date.now() - new Date(dateStr).getTime();
+                    if (Math.floor(diff / (1000 * 60 * 60 * 24)) > 90) {
+                        stale++;
+                    }
+                }
+            }
+        });
+
+        Object.values(pwdCounts).forEach(count => {
+            if (count > 1) reused += (count - 1);
+        });
+
+        return { total, favorites, weak, with2fa, loginCount, cardCount, reused, stale };
     }, [items]);
 
     return (
@@ -325,7 +347,7 @@ export default function Dashboard() {
 
             {/* ─ Stats bar (only when items loaded) ────────────────── */}
             {!loading && items.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <StatCard icon={Shield} label="Total Items" value={stats.total} color="text-primary" />
                     <StatCard icon={Star} label="Favourites" value={stats.favorites} color="text-yellow-500" />
                     <StatCard
@@ -336,6 +358,20 @@ export default function Dashboard() {
                         bg={stats.weak > 0 ? 'border-red-500/20 bg-red-500/5' : ''}
                     />
                     <StatCard icon={ShieldCheck} label="2FA Protected" value={stats.with2fa} color="text-green-500" />
+                    <StatCard 
+                        icon={RefreshCw} 
+                        label="Re-Used" 
+                        value={stats.reused} 
+                        color={stats.reused > 0 ? 'text-yellow-500' : 'text-green-500'} 
+                        bg={stats.reused > 0 ? 'border-yellow-500/20 bg-yellow-500/5' : ''} 
+                    />
+                    <StatCard 
+                        icon={Clock} 
+                        label=">90 Days" 
+                        value={stats.stale} 
+                        color={stats.stale > 0 ? 'text-orange-400' : 'text-green-500'} 
+                        bg={stats.stale > 0 ? 'border-orange-500/20 bg-orange-500/5' : ''} 
+                    />
                 </div>
             )}
 
@@ -381,9 +417,6 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
-
-            {/* ─ AI Vault Hygiene Dashboard ───────────────────── */}
-            {!loading && <VaultHygiene items={items} />}
 
             {/* ─ Vault Content ─────────────────────────────────── */}
             {loading ? (

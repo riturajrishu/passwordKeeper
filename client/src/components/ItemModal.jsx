@@ -599,6 +599,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                                                setIsScanning(false);
                                                useToastStore.getState().addToast("2FA Secret extracted!", "success");
                                            } else {
+                                               setIsScanning(false);
                                                useToastStore.getState().addToast("QR Code invalid: No secret found.", "error");
                                            }
                                        } else {
