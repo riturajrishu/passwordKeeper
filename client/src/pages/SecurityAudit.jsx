@@ -8,7 +8,7 @@ import {
     ShieldEllipsis, Zap, Clock, Key, CreditCard,
     Wifi, FileText, UserCircle, KeyRound, ShieldOff,
     RefreshCw, Info, Lock, HardDrive, AlertOctagon,
-    ChevronDown, ChevronUp, Edit3
+    ChevronDown, ChevronUp, Edit3, EyeOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/useAuthStore';
@@ -147,73 +147,102 @@ const SecurityAudit = () => {
         }
     };
 
+    const [showIgnored, setShowIgnored] = useState(false);
+    const [ignoredAuditRules, setIgnoredAuditRules] = useState(() => {
+        try {
+            const local = localStorage.getItem('keeperx_ignored_audit_rules');
+            return local ? JSON.parse(local) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const toggleIgnore = (itemId, ruleKey) => {
+        const key = `${itemId}_${ruleKey}`;
+        setIgnoredAuditRules(prev => {
+            const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key];
+            localStorage.setItem('keeperx_ignored_audit_rules', JSON.stringify(next));
+            return next;
+        });
+    };
+
     // ─── Core stats ────────────────────────────────────────────────────────
     const stats = useMemo(() => {
         const total = items.length;
         if (total === 0) return {
             score: 100, weak: 0, fair: 0, strong: 0, reused: 0,
-            total: 0, withPassword: 0, missing2fa: 0, oldPasswords: 0, log: []
+            total: 0, withPassword: 0, missing2fa: 0, oldPasswords: 0, log: [], ignoredLog: []
         };
 
         const passwordItems = items.filter(i => i.password);
         const withPassword = passwordItems.length;
 
+        // Base distributions for the right panels (they ignore the "ignored" states so data remains true)
         const pwdMap = {};
-        let weak = 0, fair = 0, strong = 0;
-
+        let totalWeak = 0, totalFair = 0, totalStrong = 0;
         passwordItems.forEach(i => {
             const s = getStrength(i.password);
-            if (s < 2) weak++;
-            else if (s < 4) fair++;
-            else strong++;
+            if (s < 2) totalWeak++;
+            else if (s < 4) totalFair++;
+            else totalStrong++;
             pwdMap[i.password] = (pwdMap[i.password] || 0) + 1;
         });
 
-        let reused = 0;
-        Object.values(pwdMap).forEach(c => { if (c > 1) reused += c; });
-
-        const weakItems = passwordItems.filter(i => getStrength(i.password) < 2);
-        const fairItems = passwordItems.filter(i => getStrength(i.password) >= 2 && getStrength(i.password) < 4);
-        const staleItems = passwordItems.filter(i => daysOld(i.updatedAt) > 90);
-        const missing2faItemsOriginal = items.filter(i => i.itemType === 'LOGIN' && !i.totpSecret);
-        const reusedItemsRaw = items.filter(i => i.password && pwdMap[i.password] > 1);
-
-        const missing2fa = missing2faItemsOriginal.length;
-        const oldPasswords = staleItems.length;
-
         let score = 100;
         const log = [];
+        const ignoredLog = [];
 
-        if (weak > 0) {
-            const deduction = Math.min(30, weak * 10);
-            score -= deduction;
-            log.push({ reason: `${weak} Weak Password${weak > 1 ? 's' : ''}`, deduction, color: 'text-red-500', affectedItems: weakItems });
-        }
-        if (fair > 0) {
-            const deduction = Math.min(10, fair * 2);
-            score -= deduction;
-            log.push({ reason: `${fair} Moderate Password${fair > 1 ? 's' : ''}`, deduction, color: 'text-yellow-500', affectedItems: fairItems });
-        }
-        if (oldPasswords > 0) {
-            const deduction = Math.min(15, oldPasswords * 5);
-            score -= deduction;
-            log.push({ reason: `${oldPasswords} Stale Password${oldPasswords > 1 ? 's' : ''} (>90d)`, deduction, color: 'text-orange-400', affectedItems: staleItems });
-        }
-        if (missing2fa > 0) {
-            const deduction = Math.min(25, missing2fa * 5);
-            score -= deduction;
-            log.push({ reason: `${missing2fa} Login${missing2fa > 1 ? 's' : ''} missing 2FA`, deduction, color: 'text-red-500', affectedItems: missing2faItemsOriginal });
-        }
-        if (reused > 0) {
-            const deduction = Math.min(20, reused * 5);
-            score -= deduction;
-            log.push({ reason: `${reused} Reused Password${reused > 1 ? 's' : ''}`, deduction, color: 'text-yellow-500', affectedItems: reusedItemsRaw });
-        }
+        // Dynamic rule processor
+        const processRule = (rawItems, ruleKey, ruleName, baseDeduct, maxDeduct, colorClass, overrideKey) => {
+            const activeItems = [];
+            rawItems.forEach(item => {
+                if (ignoredAuditRules.includes(`${item._id}_${ruleKey}`)) {
+                    ignoredLog.push({ item, ruleKey, ruleName, baseDeduct, colorClass });
+                } else {
+                    activeItems.push(item);
+                }
+            });
+
+            if (activeItems.length > 0) {
+                const deduction = Math.min(maxDeduct, activeItems.length * baseDeduct);
+                score -= deduction;
+                log.push({
+                    ruleKey,
+                    reason: `${activeItems.length} ${ruleName}${activeItems.length > 1 ? 's' : ''}`, 
+                    deduction, 
+                    color: colorClass, 
+                    affectedItems: activeItems 
+                });
+            }
+            return activeItems;
+        };
+
+        const activeWeakItems = processRule(passwordItems.filter(i => getStrength(i.password) < 2), 'weak', 'Weak Password', 10, 30, 'text-red-500');
+        const activeFairItems = processRule(passwordItems.filter(i => getStrength(i.password) >= 2 && getStrength(i.password) < 4), 'fair', 'Moderate Password', 2, 10, 'text-yellow-500');
+        const activeStaleItems = processRule(passwordItems.filter(i => daysOld(i.updatedAt) > 90), 'stale', 'Stale Password', 5, 15, 'text-orange-400');
+        const activeNo2faItems = processRule(items.filter(i => i.itemType === 'LOGIN' && !i.totpSecret), '2fa', 'Login missing 2FA', 5, 25, 'text-red-500');
+        
+        // Reused passwords specific check
+        const reusedRaw = items.filter(i => i.password && pwdMap[i.password] > 1);
+        const activeReusedItems = processRule(reusedRaw, 'reused', 'Reused Password', 5, 20, 'text-yellow-500');
 
         score = Math.max(0, score);
 
-        return { score, weak, fair, strong, reused, total, withPassword, missing2fa, oldPasswords, log };
-    }, [items]);
+        return { 
+            score, 
+            weak: activeWeakItems.length, 
+            fair: activeFairItems.length, 
+            strong: totalStrong, 
+            reused: activeReusedItems.length, 
+            total, 
+            withPassword, 
+            missing2fa: activeNo2faItems.length, 
+            oldPasswords: activeStaleItems.length, 
+            log,
+            ignoredLog,
+            totalWeak, totalFair
+        };
+    }, [items, ignoredAuditRules]);
 
     // ─── Silent Admin Stats Sync ───────────────────────────────────────────
     useEffect(() => {
@@ -293,7 +322,7 @@ const SecurityAudit = () => {
     });
 
     return (
-        <div className="p-3 sm:p-4 lg:p-8 max-w-7xl mx-auto space-y-5 sm:space-y-8 pb-16">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-6xl mx-auto space-y-5 sm:space-y-8 pb-16">
             <header>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-1">Security Audit</h1>
                 <p className="text-muted-foreground text-xs sm:text-sm">
@@ -301,8 +330,8 @@ const SecurityAudit = () => {
                 </p>
             </header>
 
-            {/* ── Top 3 cards ─────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* ── Top cards array ─────────────────────────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
 
                 {/* Health Score */}
                 <motion.div {...fadeUp(0)}
@@ -386,12 +415,20 @@ const SecurityAudit = () => {
                                                                     <span className="text-[11px] font-bold truncate opacity-90">{item.appName || 'Unnamed'}</span>
                                                                     {item.username && <span className="text-[10px] text-muted-foreground truncate hidden xs:inline pl-1 border-l border-border/50">{item.username}</span>}
                                                                 </div>
-                                                                <button
-                                                                    onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
-                                                                    className="shrink-0 flex items-center gap-1.5 px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded border border-primary/20 transition-colors text-[10px] font-bold"
-                                                                >
-                                                                    <Edit3 size={10} /> Fix
-                                                                </button>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <button
+                                                                        onClick={() => toggleIgnore(item._id, entry.ruleKey)}
+                                                                        className="flex items-center gap-1 px-2 py-1 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded border border-border/50 transition-colors text-[10px] font-bold"
+                                                                    >
+                                                                        <EyeOff size={10} /> Ignore
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                                                                        className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded border border-primary/20 transition-colors text-[10px] font-bold"
+                                                                    >
+                                                                        <Edit3 size={10} /> Fix
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         )})}
                                                     </div>
@@ -404,13 +441,61 @@ const SecurityAudit = () => {
                                     <span>Final Health Score</span>
                                     <span className="text-foreground">{stats.score} / 100</span>
                                 </div>
+
+                                {stats.ignoredLog && stats.ignoredLog.length > 0 && (
+                                    <div className="pt-4 mt-2 border-t border-border/30">
+                                        <button 
+                                            onClick={() => setShowIgnored(!showIgnored)}
+                                            className="w-full flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground mb-2 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-1.5">
+                                                <ShieldOff size={12} className="opacity-50"/> Ignored Deductions ({stats.ignoredLog.length})
+                                            </div>
+                                            {showIgnored ? <ChevronUp size={12} className="opacity-50" /> : <ChevronDown size={12} className="opacity-50" />}
+                                        </button>
+                                        <AnimatePresence>
+                                            {showIgnored && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="space-y-1.5 pt-1">
+                                            {stats.ignoredLog.map(({ item, ruleKey, ruleName }, idx) => {
+                                                const Icon = TYPE_ICONS[item.itemType]?.Icon || KeyRound;
+                                                return (
+                                                    <div key={`ignored_${item._id}_${ruleKey}_${idx}`} className="flex items-center justify-between gap-2 p-1.5 bg-black/5 dark:bg-white/5 rounded border border-border/30 pl-2">
+                                                        <div className="flex items-center gap-1.5 min-w-0 pr-2 overflow-hidden">
+                                                            <Icon size={10} className="opacity-40 shrink-0" />
+                                                            <span className="text-[10px] font-medium truncate opacity-60 line-through">{item.appName || 'Unnamed'}</span>
+                                                            <span className="text-[9px] text-muted-foreground truncate opacity-50 ml-1">· {ruleName}</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => toggleIgnore(item._id, ruleKey)}
+                                                            className="shrink-0 px-2 py-1 bg-background hover:bg-muted text-muted-foreground hover:text-foreground rounded border border-border/50 transition-colors text-[9px] font-bold"
+                                                        >
+                                                            Restore
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
                 </motion.div>
 
-                {/* Strength Distribution Pie */}
-                <motion.div {...fadeUp(0.08)}
+                {/* Right Column Layout Wrapper */}
+                <div className="flex flex-col gap-4 sm:gap-6 w-full">
+
+                    {/* Strength Distribution Pie */}
+                    <motion.div {...fadeUp(0.08)}
                     className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border flex flex-col"
                 >
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Strength Distribution</h3>
@@ -516,6 +601,8 @@ const SecurityAudit = () => {
                         </>
                     )}
                 </motion.div>
+                
+                </div>
             </div>
 
             {/* ── Security Insight Rows ──────────────────────────────────── */}
@@ -700,7 +787,7 @@ const SecurityAudit = () => {
                             setEditingItem(null);
                         }}
                         onSave={handleSaveItem}
-                        initialItem={editingItem}
+                        editingItem={editingItem}
                     />
                 )}
             </AnimatePresence>
