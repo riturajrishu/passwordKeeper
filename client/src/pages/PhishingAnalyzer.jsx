@@ -184,7 +184,7 @@ const PhishingAnalyzer = () => {
                                             </span>
                                         </div>
                                         {result.summary && (
-                                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{result.summary}</p>
+                                            <p className="text-xs text-muted-foreground leading-relaxed">{result.summary}</p>
                                         )}
                                     </div>
                                 </div>

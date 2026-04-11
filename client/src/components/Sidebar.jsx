@@ -235,10 +235,10 @@ export default function Sidebar({ isOpen, onClose }) {
                 )}
             </AnimatePresence>
 
-            {/* Sidebar Container */}
             <motion.aside
                 className={clsx(
-                    'fixed lg:relative h-full glass-panel border-r border-border flex flex-col z-50 transition-all duration-300 lg:translate-x-0 bg-background/95 lg:bg-transparent',
+                    'fixed lg:relative h-full border-r border-border flex flex-col z-50 transition-all duration-300 lg:translate-x-0',
+                    'bg-background shadow-2xl lg:shadow-none lg:glass-panel lg:bg-transparent',
                     isOpen ? 'translate-x-0' : '-translate-x-full',
                     isCollapsed ? 'w-[68px]' : 'w-64'
                 )}
