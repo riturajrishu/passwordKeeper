@@ -105,6 +105,7 @@ export default function Dashboard() {
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [breachLoading, setBreachLoading] = useState({});
     const [breachedItems, setBreachedItems] = useState({});
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const searchRef = useRef(null);
 
@@ -323,8 +324,16 @@ export default function Dashboard() {
                             type="text"
                             value={rawSearch}
                             onChange={e => setRawSearch(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => setIsSearchFocused(false)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    e.target.blur();
+                                }
+                            }}
                             placeholder="Quick search..."
-                            className="w-full bg-muted/50 border border-border rounded-xl py-3 pl-11 pr-10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-sm"
+                            className="w-full bg-muted/50 border border-border rounded-xl py-3 pl-11 pr-10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-sm z-10 relative"
                         />
                         {rawSearch && (
                             <button onClick={() => setRawSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -346,34 +355,43 @@ export default function Dashboard() {
             </div>
 
             {/* ─ Stats bar (only when items loaded) ────────────────── */}
-            {!loading && items.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4 sm:mb-6">
-                    <StatCard icon={Shield} label="Total Items" value={stats.total} color="text-primary" />
-                    <StatCard icon={Star} label="Favourites" value={stats.favorites} color="text-yellow-500" />
-                    <StatCard
-                        icon={AlertTriangle}
-                        label="Weak Passwords"
-                        value={stats.weak}
-                        color={stats.weak > 0 ? 'text-red-500' : 'text-green-500'}
-                        bg={stats.weak > 0 ? 'border-red-500/20 bg-red-500/5' : ''}
-                    />
-                    <StatCard icon={ShieldCheck} label="2FA Protected" value={stats.with2fa} color="text-green-500" />
-                    <StatCard 
-                        icon={RefreshCw} 
-                        label="Re-Used" 
-                        value={stats.reused} 
-                        color={stats.reused > 0 ? 'text-yellow-500' : 'text-green-500'} 
-                        bg={stats.reused > 0 ? 'border-yellow-500/20 bg-yellow-500/5' : ''} 
-                    />
-                    <StatCard 
-                        icon={Clock} 
-                        label=">90 Days" 
-                        value={stats.stale} 
-                        color={stats.stale > 0 ? 'text-orange-400' : 'text-green-500'} 
-                        bg={stats.stale > 0 ? 'border-orange-500/20 bg-orange-500/5' : ''} 
-                    />
-                </div>
-            )}
+            <AnimatePresence>
+                {!loading && items.length > 0 && !isSearchFocused && !rawSearch && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 mb-4 sm:mb-6 pt-1">
+                            <StatCard icon={Shield} label="Total Items" value={stats.total} color="text-primary" />
+                            <StatCard icon={Star} label="Favourites" value={stats.favorites} color="text-yellow-500" />
+                            <StatCard
+                                icon={AlertTriangle}
+                                label="Weak Passwords"
+                                value={stats.weak}
+                                color={stats.weak > 0 ? 'text-red-500' : 'text-green-500'}
+                                bg={stats.weak > 0 ? 'border-red-500/20 bg-red-500/5' : ''}
+                            />
+                            <StatCard icon={ShieldCheck} label="2FA Protected" value={stats.with2fa} color="text-green-500" />
+                            <StatCard 
+                                icon={RefreshCw} 
+                                label="Re-Used" 
+                                value={stats.reused} 
+                                color={stats.reused > 0 ? 'text-yellow-500' : 'text-green-500'} 
+                                bg={stats.reused > 0 ? 'border-yellow-500/20 bg-yellow-500/5' : ''} 
+                            />
+                            <StatCard 
+                                icon={Clock} 
+                                label=">90 Days" 
+                                value={stats.stale} 
+                                color={stats.stale > 0 ? 'text-orange-400' : 'text-green-500'} 
+                                bg={stats.stale > 0 ? 'border-orange-500/20 bg-orange-500/5' : ''} 
+                            />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ─ Filter Bar ────────────────────────────────────── */}
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8 overflow-x-auto pb-3 sm:pb-4 no-scrollbar -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 after:content-[''] after:w-1 after:shrink-0 sm:after:hidden">
@@ -417,6 +435,15 @@ export default function Dashboard() {
                     ))}
                 </div>
             </div>
+
+            {rawSearch && !loading && (
+                <div className="mb-4 sm:mb-6">
+                    <h2 className="text-sm font-bold opacity-80 flex items-center justify-between">
+                        Search Results for "{rawSearch}"
+                        <button onClick={() => setRawSearch('')} className="text-primary hover:underline text-xs">Clear search</button>
+                    </h2>
+                </div>
+            )}
 
             {/* ─ Vault Content ─────────────────────────────────── */}
             {loading ? (
