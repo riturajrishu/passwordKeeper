@@ -16,11 +16,14 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('crypto-js')) return 'crypto';
-            if (id.includes('lucide-react') || id.includes('framer-motion')) return 'ui';
+            if (id.includes('framer-motion')) return 'animations';
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('lucide-react')) return 'icons';
             return 'vendor';
           }
         }
       }
-    }
+    },
+    chunkSizeWarningLimit: 1000,
   }
 })
