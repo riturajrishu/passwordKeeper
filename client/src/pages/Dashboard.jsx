@@ -333,10 +333,18 @@ export default function Dashboard() {
                                 }
                             }}
                             placeholder="Quick search..."
-                            className="w-full bg-muted/50 border border-border rounded-xl py-3 pl-11 pr-10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-sm z-10 relative"
+                            className="w-full bg-muted/50 border border-border rounded-xl py-3 pl-11 pr-10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all shadow-sm"
                         />
                         {rawSearch && (
-                            <button onClick={() => setRawSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                            <button 
+                                type="button"
+                                onMouseDown={(e) => { 
+                                    e.preventDefault(); 
+                                    setRawSearch(''); 
+                                    searchRef.current?.blur(); 
+                                }} 
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-20 p-1"
+                            >
                                 <X size={14} />
                             </button>
                         )}
@@ -440,7 +448,7 @@ export default function Dashboard() {
                 <div className="mb-4 sm:mb-6">
                     <h2 className="text-sm font-bold opacity-80 flex items-center justify-between">
                         Search Results for "{rawSearch}"
-                        <button onClick={() => setRawSearch('')} className="text-primary hover:underline text-xs">Clear search</button>
+                        <button onClick={() => { setRawSearch(''); searchRef.current?.blur(); }} className="text-primary hover:underline text-xs">Clear search</button>
                     </h2>
                 </div>
             )}
