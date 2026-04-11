@@ -43,7 +43,7 @@ export default function Toast() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 80, scale: 0.9 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className={`pointer-events-auto relative flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl w-[300px] sm:min-w-[300px] sm:max-w-sm overflow-hidden ${cls}`}
+              className={`pointer-events-auto relative flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-xl w-auto min-w-[250px] max-w-[calc(100vw-2rem)] sm:max-w-md overflow-hidden ${cls}`}
             >
               <Icon size={18} className="shrink-0" />
               <p className="text-sm font-medium text-foreground flex-1 leading-snug">{toast.message}</p>

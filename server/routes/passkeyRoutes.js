@@ -6,8 +6,8 @@ import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 const rpName = 'Keeper X';
-const rpID = 'localhost'; // In production, this should be the actual domain
-const origin = `http://${rpID}:5173`;
+const origin = process.env.CLIENT_URL || 'http://localhost:5173';
+const rpID = process.env.CLIENT_URL ? new URL(process.env.CLIENT_URL).hostname : 'localhost';
 
 // Store challenge temporarily (in production use Redis/DB)
 const currentChallenges = {};

@@ -4,7 +4,7 @@ import useToastStore from '../store/useToastStore';
 import useNotificationStore from '../store/useNotificationStore';
 import {
     User, Mail, Phone, Lock, Save, Shield, Download, LogOut,
-    Smartphone, Moon, Sun, Clock, Trash2, ArrowRight, Loader2, KeyRound, AlertCircle
+    Smartphone, Moon, Sun, Clock, Trash2, ArrowRight, Loader2, KeyRound, AlertCircle, ShieldCheck, Check
 } from 'lucide-react';
 import {
     updateProfile, updateSecurity, reEncryptVault, fetchVaultItems, logoutUser, createVaultItem, regenerateRecoveryHash, API_URL
