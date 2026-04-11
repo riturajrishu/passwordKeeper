@@ -409,3 +409,16 @@ export const deleteSecureFile = async (fileId) => {
     return data;
 };
 
+// --- AI INTELLIGENCE ROUTES ---
+
+export const analyzePhishingData = async (text) => {
+    const res = await fetch(`${API_URL}/ai/analyze-phishing`, {
+        ...defaultOptions,
+        method: 'POST',
+        body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to analyze data via AI');
+    return data;
+};
+

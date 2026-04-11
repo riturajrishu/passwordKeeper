@@ -17,6 +17,7 @@ import supportRoutes from './routes/supportRoutes.js';
 import shareRoutes from './routes/shareRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,6 +64,7 @@ app.use('/api/support', supportRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/files', fileRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
