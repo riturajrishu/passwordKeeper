@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Wand2, Eye, EyeOff, Copy, MailPlus, Tag, Plus } from 'lucide-react';
+import { X, Wand2, Eye, EyeOff, Copy, MailPlus, Tag, Plus, QrCode } from 'lucide-react';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import clsx from 'clsx';
 import useToastStore from '../store/useToastStore';
 import PasswordGenerator from './PasswordGenerator';
@@ -94,6 +95,7 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
 
     const [showPassword,      setShowPassword]      = useState(false);
     const [isGeneratorOpen,   setIsGeneratorOpen]   = useState(false);
+    const [isScanning,        setIsScanning]        = useState(false);
     const [visibleHistoryIdx, setVisibleHistoryIdx] = useState(new Set());
     const addToast = useToastStore(s => s.addToast);
     const tagInputRef = useRef(null);
@@ -386,7 +388,17 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                                 <PasswordStrength password={password} />
                                 <div>
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">TOTP Secret (2FA Auth Key)</label>
-                                    <input value={totpSecret} onChange={e => setTotpSecret(e.target.value)} className={clsx(inputCls, 'font-mono placeholder:font-sans')} placeholder="JBSWY3DPEHPK3PXP" />
+                                    <div className="relative group/field">
+                                        <input value={totpSecret} onChange={e => setTotpSecret(e.target.value)} className={clsx(inputCls, 'font-mono placeholder:font-sans pr-12')} placeholder="JBSWY3DPEHPK3PXP" />
+                                        <button 
+                                            type="button"
+                                            onClick={() => setIsScanning(true)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-primary transition-colors bg-muted rounded-lg shadow-sm border border-border"
+                                            title="Scan QR Code"
+                                        >
+                                            <QrCode size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -555,6 +567,61 @@ export default function ItemModal({ isOpen, onClose, onSave, editingItem }) {
                     onClose={() => setIsGeneratorOpen(false)}
                     onUse={(pwd) => { setPassword(pwd); setIsGeneratorOpen(false); }}
                 />
+            )}
+
+            {isScanning && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-background/95 backdrop-blur-md">
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-card w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl border border-border flex flex-col relative"
+                    >
+                        <div className="p-4 flex items-center justify-between border-b border-border/50 bg-muted/30">
+                            <h3 className="font-bold flex items-center gap-2">
+                                <QrCode size={18} className="text-primary" /> Scan 2FA QR Code
+                            </h3>
+                            <button onClick={() => setIsScanning(false)} className="p-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="relative aspect-square w-full bg-black flex items-center justify-center">
+                            <Scanner 
+                               onScan={(result) => {
+                                   if (!result || result.length === 0) return;
+                                   const data = result[0].rawValue;
+                                   try {
+                                       const url = new URL(data);
+                                       if (url.protocol === 'otpauth:') {
+                                           const secret = url.searchParams.get('secret');
+                                           if (secret) {
+                                               setTotpSecret(secret);
+                                               setIsScanning(false);
+                                               useToastStore.getState().addToast("2FA Secret extracted!", "success");
+                                           } else {
+                                               useToastStore.getState().addToast("QR Code invalid: No secret found.", "error");
+                                           }
+                                       } else {
+                                            setTotpSecret(data.replace(/\s+/g, ''));
+                                            setIsScanning(false);
+                                            useToastStore.getState().addToast("Raw text extracted as secret.", "success");
+                                       }
+                                   } catch (e) {
+                                       setTotpSecret(data.replace(/\s+/g, ''));
+                                       setIsScanning(false);
+                                       useToastStore.getState().addToast("Extracted secret from QR.", "success");
+                                   }
+                               }} 
+                            />
+                            {/* Scanning overlay UI */}
+                            <div className="absolute inset-0 border-[3px] border-primary/50 m-12 rounded-3xl pointer-events-none" />
+                            <div className="absolute w-full h-1 bg-primary/80 blur-[2px] top-1/2 left-0 -translate-y-1/2 animate-pulse pointer-events-none" />
+                        </div>
+                        <div className="p-4 text-center bg-muted/30">
+                            <p className="text-xs text-muted-foreground font-medium">Position the QR code within the frame.</p>
+                        </div>
+                    </motion.div>
+                </div>
             )}
         </div>,
         document.body

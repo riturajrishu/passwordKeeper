@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
+    "@yudiel/react-qr-scanner": "^2.5.1",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "dompurify": "^3.3.3",

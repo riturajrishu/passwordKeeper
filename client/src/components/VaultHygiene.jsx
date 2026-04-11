@@ -103,7 +103,7 @@ export default function VaultHygiene({ items }) {
 
                 {/* Score Circular Meter */}
                 <div className="relative shrink-0 w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90">
+                    <svg viewBox="0 0 128 128" className="w-full h-full transform -rotate-90">
                         {/* Track */}
                         <circle cx="64" cy="64" r="54" stroke="currentColor" strokeWidth="8" fill="none" className="text-black/5 dark:text-white/5" />
                         {/* Progress */}
@@ -134,18 +134,18 @@ export default function VaultHygiene({ items }) {
                         <h2 className="text-xl sm:text-2xl font-bold tracking-tight">{insight}</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-3 flex flex-col item-center md:items-start text-center md:text-left">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Re-used</span>
-                            <span className={clsx("text-lg font-black", duplicateCount > 0 ? "text-yellow-500" : "text-green-500")}>{duplicateCount} Pwds</span>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-2 sm:p-3 flex flex-col items-center md:items-start text-center md:text-left">
+                            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-tight sm:tracking-widest truncate w-full">Re-used</span>
+                            <span className={clsx("text-sm sm:text-lg font-black", duplicateCount > 0 ? "text-yellow-500" : "text-green-500")}>{duplicateCount}</span>
                         </div>
-                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-3 flex flex-col item-center md:items-start text-center md:text-left">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Weak</span>
-                            <span className={clsx("text-lg font-black", weakCount > 0 ? "text-red-500" : "text-green-500")}>{weakCount} Pwds</span>
+                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-2 sm:p-3 flex flex-col items-center md:items-start text-center md:text-left">
+                            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-tight sm:tracking-widest truncate w-full">Weak</span>
+                            <span className={clsx("text-sm sm:text-lg font-black", weakCount > 0 ? "text-red-500" : "text-green-500")}>{weakCount}</span>
                         </div>
-                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-3 flex flex-col item-center md:items-start text-center md:text-left">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">&gt; 90 Days Old</span>
-                            <span className={clsx("text-lg font-black", oldCount > 0 ? "text-orange-500" : "text-green-500")}>{oldCount} Pwds</span>
+                        <div className="bg-black/5 dark:bg-white/5 border border-border/50 rounded-xl p-2 sm:p-3 flex flex-col items-center md:items-start text-center md:text-left">
+                            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-tight sm:tracking-widest truncate w-full">&gt;90 Days</span>
+                            <span className={clsx("text-sm sm:text-lg font-black", oldCount > 0 ? "text-orange-500" : "text-green-500")}>{oldCount}</span>
                         </div>
                     </div>
                 </div>

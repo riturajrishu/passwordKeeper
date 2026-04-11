@@ -293,11 +293,8 @@ export default function Dashboard() {
                         {stats.total} item{stats.total !== 1 ? 's' : ''} <span className="hidden xs:inline">encrypted with AES-256</span> <span className="hidden md:inline">· Press <kbd className="px-2 py-1 rounded-lg bg-muted border border-border text-[10px] font-mono shadow-sm">Ctrl+N</kbd></span>
                     </p>
                 </div>
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full md:w-auto">
-                    <div className="order-2 sm:order-1">
-                        <AutoLockTimerDisplay />
-                    </div>
-                    <div className="relative flex-1 sm:w-64 group order-1 sm:order-2">
+                <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 w-full md:w-auto">
+                    <div className="relative w-full sm:flex-1 sm:w-64 group order-1 sm:order-2">
                         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <input
                             ref={searchRef}
@@ -312,6 +309,9 @@ export default function Dashboard() {
                                 <X size={14} />
                             </button>
                         )}
+                    </div>
+                    <div className="order-2 sm:order-1 flex items-center">
+                        <AutoLockTimerDisplay />
                     </div>
                     <motion.button
                         whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}
@@ -340,7 +340,7 @@ export default function Dashboard() {
             )}
 
             {/* ─ Filter Bar ────────────────────────────────────── */}
-            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8 overflow-x-auto pb-3 sm:pb-4 no-scrollbar -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8 overflow-x-auto pb-3 sm:pb-4 no-scrollbar -mx-3 px-3 sm:-mx-4 sm:px-4 lg:mx-0 lg:px-0 after:content-[''] after:w-1 after:shrink-0 sm:after:hidden">
                 <div className="flex bg-muted/60 p-1.5 rounded-2xl border border-border/60 shadow-inner shrink-0">
                     {[
                         { id: 'all', label: 'All Items' },
