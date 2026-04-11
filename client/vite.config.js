@@ -10,4 +10,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('crypto-js')) return 'crypto';
+            if (id.includes('lucide-react') || id.includes('framer-motion')) return 'ui';
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
 })

@@ -24,7 +24,7 @@ const CATEGORIES = ['Uncategorized', 'Personal', 'Work', 'Banking', 'Social', 'G
 
 const staggerContainer = {
     hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.04 } }
+    show: { opacity: 1, transition: { staggerChildren: 0.02, delayChildren: 0.05 } }
 };
 
 // ─── Auto-lock countdown display ──────────────────────────────────────────

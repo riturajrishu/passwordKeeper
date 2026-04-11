@@ -4,12 +4,12 @@ import useToastStore from '../store/useToastStore';
 import useNotificationStore from '../store/useNotificationStore';
 import {
     User, Mail, Phone, Lock, Save, Shield, Download, LogOut,
-    Smartphone, Moon, Sun, Clock, Trash2, ArrowRight, Loader2, KeyRound
+    Smartphone, Moon, Sun, Clock, Trash2, ArrowRight, Loader2, KeyRound, AlertCircle
 } from 'lucide-react';
 import {
-    updateProfile, updateSecurity, reEncryptVault, fetchVaultItems, logoutUser, createVaultItem, API_URL
+    updateProfile, updateSecurity, reEncryptVault, fetchVaultItems, logoutUser, createVaultItem, regenerateRecoveryHash, API_URL
 } from '../lib/api';
-import { deriveKey, deriveKeys, encryptData, decryptData } from '../lib/crypto';
+import { deriveKey, deriveKeys, encryptData, decryptData, generateRecoveryKey } from '../lib/crypto';
 import { useTheme } from '../components/ThemeProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -40,12 +40,20 @@ const Settings = () => {
     // Status States
     const [loading, setLoading] = useState(false);
     const [securityLoading, setSecurityLoading] = useState(false);
+    const [reEncryptionStatus, setReEncryptionStatus] = useState('');
     // Shamir's Secret Sharing States
     const [shamirMaster, setShamirMaster] = useState('');
     const [generatedShares, setGeneratedShares] = useState([]);
     
     const [recoveryShares, setRecoveryShares] = useState(['', '', '']);
     const [recoveredPassword, setRecoveredPassword] = useState('');
+
+    // Recovery Key Generation States
+    const [recoveryModal, setRecoveryModal] = useState(false);
+    const [recoveryLoginPassword, setRecoveryLoginPassword] = useState('');
+    const [newGeneratedRecoveryKey, setNewGeneratedRecoveryKey] = useState('');
+    const [recoveryKeyLoading, setRecoveryKeyLoading] = useState(false);
+    const [recoveryCopied, setRecoveryCopied] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -54,6 +62,18 @@ const Settings = () => {
             setProfileEmail(user.email || '');
         }
     }, [user]);
+
+    // Prevent tab close/refresh during sensitive re-encryption operations
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (securityLoading) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for most browsers to show the confirmation dialog
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [securityLoading]);
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
@@ -281,8 +301,47 @@ const Settings = () => {
         }
     };
 
+    const handleRegenerateRecoveryKey = async (e) => {
+        e.preventDefault();
+        setRecoveryKeyLoading(true);
+        try {
+            const rawKey = generateRecoveryKey();
+            await regenerateRecoveryHash(recoveryLoginPassword, rawKey);
+            setNewGeneratedRecoveryKey(rawKey);
+            addToast("Recovery Key successfully regenerated!", "success");
+            addNotification("Recovery Key Updated", "A new account recovery key was generated securely.", "info");
+        } catch (err) {
+            addToast(err.message, "error");
+        } finally {
+            setRecoveryKeyLoading(false);
+            setRecoveryLoginPassword('');
+        }
+    };
+
     return (
-        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-10 pb-20">
+        <div className="p-3 sm:p-4 lg:p-8 max-w-5xl mx-auto space-y-6 sm:space-y-10 pb-20 relative">
+            {securityLoading && (
+                <div className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 animate-in fade-in duration-300">
+                    <div className="relative mb-6">
+                        <Loader2 size={56} className="text-primary animate-spin" />
+                        <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full"></div>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black capitalize tracking-tight text-foreground mb-4">
+                        {reEncryptionStatus.replace('-', ' ')}...
+                    </h3>
+                    <div className="bg-red-500/10 border border-red-500/30 p-5 rounded-2xl max-w-md space-y-3 shadow-2xl">
+                        <p className="text-red-500 font-bold text-sm sm:text-base uppercase tracking-widest flex items-center justify-center gap-2">
+                            <AlertCircle size={18} className="animate-pulse" /> Critical Warning
+                        </p>
+                        <p className="text-base sm:text-lg font-medium text-foreground">
+                            Do NOT refresh, close this tab, or navigate away. 
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                            Your vault is being locally re-encrypted with your new security keys. Interruption may cause sync issues.
+                        </p>
+                    </div>
+                </div>
+            )}
             <header>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-2">Settings</h1>
                 <p className="text-muted-foreground text-sm">Personalize and secure your Keeper X experience.</p>
@@ -323,13 +382,6 @@ const Settings = () => {
 
                     {/* Security & Re-encryption Section */}
                     <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 sm:space-y-6 relative overflow-hidden">
-                        {securityLoading && (
-                            <div className="absolute inset-0 z-50 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6">
-                                <Loader2 size={40} className="text-primary animate-spin mb-4" />
-                                <h3 className="text-xl font-bold capitalize">{reEncryptionStatus.replace('-', ' ')}...</h3>
-                                <p className="text-sm text-muted-foreground mt-2 max-w-xs">Please stay on this page. We are re-encrypting your entire vault locally to ensure total zero-knowledge security.</p>
-                            </div>
-                        )}
                         <div className="flex items-center gap-3 border-b border-border/50 pb-4">
                             <div className="p-2 bg-primary/10 rounded-lg text-primary"><Shield size={20} /></div>
                             <h2 className="text-xl font-bold">Security & Authentication</h2>
@@ -339,17 +391,17 @@ const Settings = () => {
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Associated Email (Changing triggers re-encryption)</label>
                                 <div className="relative">
                                     <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
-                                    <input value={profileEmail} onChange={e => setProfileEmail(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm" />
+                                    <input value={profileEmail} onChange={e => setProfileEmail(e.target.value)} className="w-full pl-10 pr-4 py-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                                 <div className="space-y-4 col-span-1 border border-border/50 rounded-2xl p-4 bg-black/5 dark:bg-white/5">
                                     <h3 className="text-sm font-bold tracking-widest uppercase text-muted-foreground">Change Login Password</h3>
                                     <div className="space-y-2">
-                                        <input type="password" value={newLoginPassword} onChange={e => setNewLoginPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm" placeholder="New Login Password" />
+                                        <input type="password" value={newLoginPassword} onChange={e => setNewLoginPassword(e.target.value)} className="w-full px-4 py-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm transition-all" placeholder="New Login Password" />
                                     </div>
                                     <div className="space-y-2">
-                                        <input type="password" value={confirmNewLoginPassword} onChange={e => setConfirmNewLoginPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm" placeholder="Confirm Login Password" />
+                                        <input type="password" value={confirmNewLoginPassword} onChange={e => setConfirmNewLoginPassword(e.target.value)} className="w-full px-4 py-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm transition-all" placeholder="Confirm Login Password" />
                                     </div>
                                 </div>
 
@@ -357,17 +409,32 @@ const Settings = () => {
                                     <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full -z-10" />
                                     <h3 className="text-sm font-bold tracking-widest uppercase text-primary">Change Master Password</h3>
                                     <div className="space-y-2">
-                                        <input type="password" value={newMasterPassword} onChange={e => setNewMasterPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm border-primary/20" placeholder="New Master Password" />
+                                        <input type="password" value={newMasterPassword} onChange={e => setNewMasterPassword(e.target.value)} className="w-full px-4 py-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm transition-all shadow-inner" placeholder="New Master Password" />
                                     </div>
                                     <div className="space-y-2">
-                                        <input type="password" value={confirmNewMasterPassword} onChange={e => setConfirmNewMasterPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm border-primary/20" placeholder="Confirm Master Password" />
+                                        <input type="password" value={confirmNewMasterPassword} onChange={e => setConfirmNewMasterPassword(e.target.value)} className="w-full px-4 py-3.5 rounded-xl bg-black/5 dark:bg-white/5 border border-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm transition-all shadow-inner" placeholder="Confirm Master Password" />
                                     </div>
                                 </div>
                             </div>
                             <div className="pt-6 border-t border-border/50">
-                                <div className="space-y-2 max-w-sm">
-                                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary ml-1">Current Master Password (REQUIRED)</label>
-                                    <input required type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-4 py-3 rounded-2xl bg-primary/5 border border-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-sm" placeholder="Verify identity to update" />
+                                <div className="space-y-3 max-w-sm bg-primary/5 border border-primary/10 p-5 rounded-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-bl-full -z-10 blur-xl" />
+                                    <div>
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5 mb-1">
+                                            <Lock size={14} /> Verification Required
+                                        </label>
+                                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                            Please enter your <strong className="text-foreground">Current Vault Master Password</strong> to authorize these security changes.
+                                        </p>
+                                    </div>
+                                    <input 
+                                        required 
+                                        type="password" 
+                                        value={currentPassword} 
+                                        onChange={e => setCurrentPassword(e.target.value)} 
+                                        className="w-full px-4 py-3 rounded-xl bg-background/50 border border-primary/20 focus:ring-2 focus:ring-primary/50 focus:outline-none text-sm font-medium tracking-widest" 
+                                        placeholder="••••••••••••" 
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-end pt-2">
@@ -376,6 +443,32 @@ const Settings = () => {
                                 </motion.button>
                             </div>
                         </form>
+                    </section>
+
+                    {/* Account Recovery Key Section */}
+                    <section className="glass-panel p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-border space-y-4 sm:space-y-6">
+                        <div className="flex items-center gap-3 border-b border-border/50 pb-4">
+                            <div className="p-2 bg-primary/10 rounded-lg text-primary"><AlertCircle size={20} /></div>
+                            <div>
+                                <h2 className="text-xl font-bold">Account Recovery Key</h2>
+                                <p className="text-xs text-muted-foreground mt-1">If you forget your login password, this key is the only way to regain access.</p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-border/50 gap-4">
+                            <div>
+                                <h4 className="font-bold text-sm">Regenerate Lost Key</h4>
+                                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                                    Forgot your recovery key? Generate a new one immediately. Previous keys will become invalid.
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => { setRecoveryModal(true); setNewGeneratedRecoveryKey(''); setRecoveryLoginPassword(''); }}
+                                className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-5 py-2.5 rounded-xl font-bold text-sm transition-colors border border-primary/20 shrink-0 whitespace-nowrap"
+                            >
+                                Get New Key
+                            </button>
+                        </div>
                     </section>
 
                     {/* Passkey Section */}
@@ -555,6 +648,96 @@ const Settings = () => {
                     </section>
                 </div>
             </div>
+
+            {/* Recovery Key Generator Modal */}
+            <AnimatePresence>
+                {recoveryModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                            className="bg-card w-full max-w-md rounded-3xl border border-border p-6 shadow-2xl relative overflow-hidden"
+                        >
+                            {!newGeneratedRecoveryKey ? (
+                                <form onSubmit={handleRegenerateRecoveryKey} className="space-y-6">
+                                    <div className="flex items-center gap-3 mb-2 text-primary">
+                                        <AlertCircle size={28} />
+                                        <h3 className="text-xl font-bold">Verify Identity</h3>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        To generate a new Account Recovery Key, please enter your <strong className="text-foreground">Current Account Login Password</strong>.
+                                    </p>
+
+                                    <div className="space-y-2">
+                                        <input
+                                            type="password"
+                                            required
+                                            value={recoveryLoginPassword}
+                                            onChange={(e) => setRecoveryLoginPassword(e.target.value)}
+                                            className="w-full bg-black/5 dark:bg-white/5 border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors text-sm"
+                                            placeholder="Enter Login Password"
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex justify-end gap-3 pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setRecoveryModal(false)}
+                                            className="px-4 py-2 font-bold text-muted-foreground hover:text-foreground rounded-xl transition-colors text-sm"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={recoveryKeyLoading}
+                                            className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-xl flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all text-sm"
+                                        >
+                                            {recoveryKeyLoading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                                            Generate Key
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="space-y-6 text-center">
+                                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500 mb-4">
+                                        <Check size={32} />
+                                    </div>
+                                    <h3 className="text-2xl font-bold">New Key Generated</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        This is your new Account Recovery Key. Your old keys will no longer work. Save this securely right now!
+                                    </p>
+
+                                    <div 
+                                        className="bg-black/20 border border-primary/30 p-5 rounded-2xl cursor-pointer group relative overflow-hidden"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(newGeneratedRecoveryKey);
+                                            setRecoveryCopied(true);
+                                            setTimeout(() => setRecoveryCopied(false), 2000);
+                                            addToast("Recovery Key Copied", "success");
+                                        }}
+                                    >
+                                        <p className="font-mono text-xl tracking-widest text-primary font-bold group-hover:blur-[2px] transition-all">
+                                            {newGeneratedRecoveryKey}
+                                        </p>
+                                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                                            {recoveryCopied ? <span className="font-bold text-white text-sm">Copied!</span> : <span className="font-bold text-white text-sm">Click to Copy</span>}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => setRecoveryModal(false)}
+                                        className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all"
+                                    >
+                                        I've Saved It Safely
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

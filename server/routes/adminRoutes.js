@@ -131,4 +131,45 @@ router.put('/tickets/:id/reply', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
+// PUT Admin force-reset user login password
+router.put('/users/:id/reset-login-password', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const { newLoginPassword } = req.body;
+        if (!newLoginPassword) {
+            return res.status(400).json({ message: 'New login password is required' });
+        }
+
+        const targetUserId = req.params.id;
+        const currentAdmin = req.adminUser;
+
+        const targetUser = await User.findById(targetUserId);
+        if (!targetUser) {
+            return res.status(404).json({ message: 'Target user not found' });
+        }
+
+        // Only superadmin can reset another admin's or superadmin's password
+        if (targetUser.role === 'admin' || targetUser.role === 'superadmin') {
+            if (currentAdmin.role !== 'superadmin') {
+                return res.status(403).json({ message: 'Forbidden - Only SuperAdmins can reset Admin passwords.' });
+            }
+        }
+
+        targetUser.passwordHash = newLoginPassword;
+        await targetUser.save();
+
+        await AuditLog.create({
+            adminId: currentAdmin._id,
+            action: 'RESET_PASSWORD',
+            targetUserId: targetUserId,
+            details: `Admin ${currentAdmin.email} forced reset login password for ${targetUser.email}`,
+            ip: req.ip || req.connection.remoteAddress
+        });
+
+        res.status(200).json({ message: 'User login password reset successfully' });
+    } catch (error) {
+        console.error('Error resetting login password by admin', error);
+        res.status(500).json({ message: 'Internal server error while resetting login password' });
+    }
+});
+
 export default router;

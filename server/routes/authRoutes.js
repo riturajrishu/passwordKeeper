@@ -249,10 +249,10 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // @route   POST /api/auth/reset-password
-// @desc    Reset master password using recovery key
+// @desc    Reset Account Login Password using recovery key
 router.post('/reset-password', async (req, res) => {
     try {
-        const { email, recoveryKey, newMasterAuthHash } = req.body;
+        const { email, recoveryKey, newLoginPassword } = req.body;
         const user = await User.findOne({ email });
 
         if (!user || !user.recoveryHash) {
@@ -264,15 +264,10 @@ router.post('/reset-password', async (req, res) => {
             return res.status(401).json({ message: 'Invalid recovery key' });
         }
 
-        if (!user.masterAuthHash) {
-            // Legacy user fallback
-            user.passwordHash = newMasterAuthHash;
-        } else {
-            user.masterAuthHash = newMasterAuthHash;
-        }
+        user.passwordHash = newLoginPassword;
         await user.save();
 
-        res.json({ message: 'Password reset successfully' });
+        res.json({ message: 'Account Login Password reset successfully' });
     } catch (error) {
         console.error('Reset error:', error);
         res.status(500).json({ message: 'Server error during password reset' });
@@ -291,9 +286,10 @@ router.put('/update-security', verifyToken, async (req, res) => {
         // Verify current password first
         let isMatch = false;
         if (user.masterAuthHash) {
-            isMatch = await user.comparePassword(currentLoginPassword);
+            isMatch = await user.compareMaster(currentAuthHash);
         } else {
-            isMatch = await user.comparePassword(currentAuthHash);
+            // Fallback for older accounts
+            isMatch = await user.comparePassword(currentAuthHash) || await user.comparePassword(currentLoginPassword);
         }
 
         if (!isMatch) {
@@ -350,6 +346,35 @@ router.put('/stats', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Stats sync error:', error);
         res.status(500).json({ message: 'Server error during stats sync' });
+    }
+});
+
+// @route   PUT /api/auth/regenerate-recovery-hash
+// @desc    Regenerate Account Recovery Hash via Login Password
+router.put('/regenerate-recovery-hash', verifyToken, async (req, res) => {
+    try {
+        const { loginPassword, newRecoveryHash } = req.body;
+        if (!loginPassword || !newRecoveryHash) {
+            return res.status(400).json({ message: 'Login password and new recovery hash are required' });
+        }
+        
+        const user = await User.findById(req.user.uid);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Verify using Login Password
+        const isMatch = await user.comparePassword(loginPassword);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect account login password' });
+        }
+
+        // Apply new recovery hash (bcrypt hashes it on save based on User schema pre-save hook)
+        user.recoveryHash = newRecoveryHash;
+        await user.save();
+
+        res.status(200).json({ message: 'Recovery key successfully regenerated' });
+    } catch (error) {
+        console.error('Regenerate recovery error:', error);
+        res.status(500).json({ message: 'Server error during regeneration' });
     }
 });
 

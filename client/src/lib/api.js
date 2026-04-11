@@ -92,14 +92,25 @@ export const getHint = async (email) => {
     return data;
 };
 
-export const resetPassword = async (email, recoveryKey, newMasterAuthHash) => {
+export const resetPassword = async (email, recoveryKey, newLoginPassword) => {
     const res = await fetch(`${API_URL}/auth/reset-password`, {
         ...defaultOptions,
         method: 'POST',
-        body: JSON.stringify({ email, recoveryKey, newMasterAuthHash })
+        body: JSON.stringify({ email, recoveryKey, newLoginPassword })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Reset failed');
+    if (!res.ok) throw new Error(data.message || 'Failed to reset password');
+    return data;
+};
+
+export const regenerateRecoveryHash = async (loginPassword, newRecoveryHash) => {
+    const res = await fetch(`${API_URL}/auth/regenerate-recovery-hash`, {
+        ...defaultOptions,
+        method: 'PUT',
+        body: JSON.stringify({ loginPassword, newRecoveryHash })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to regenerate recovery key');
     return data;
 };
 
@@ -166,6 +177,26 @@ export const deleteVaultItem = async (id) => {
     });
     if (!res.ok) throw new Error('Failed to delete item');
     return res.json();
+};
+
+export const revokeAllOtherSessions = async () => {
+    const res = await fetch(`${API_URL}/sessions/revoke-others`, {
+        ...defaultOptions,
+        method: 'DELETE'
+    });
+    if (!res.ok) throw new Error('Failed to revoke sessions');
+    return res.json();
+};
+
+export const adminResetUserPassword = async (userId, newLoginPassword) => {
+    const res = await fetch(`${API_URL}/admin/users/${userId}/reset-login-password`, {
+        ...defaultOptions,
+        method: 'PUT',
+        body: JSON.stringify({ newLoginPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to reset user password');
+    return data;
 };
 
 export const permanentDeleteVaultItem = async (id) => {

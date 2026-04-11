@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loginUser, registerUser, getHint, resetPassword as apiResetPassword, API_URL } from '../lib/api';
 import { deriveKeys, generateRecoveryKey } from '../lib/crypto';
+import { splitSecret } from '../lib/shamir';
 import useAuthStore from '../store/useAuthStore';
 import useToastStore from '../store/useToastStore';
 import {
@@ -38,6 +39,8 @@ export default function Login() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [copied, setCopied] = useState(false);
+    const [generatedShares, setGeneratedShares] = useState([]);
+    const [copiedShareIndex, setCopiedShareIndex] = useState(-1);
 
     const navigate = useNavigate();
     const setUser = useAuthStore(s => s.setUser);
@@ -78,6 +81,14 @@ export default function Login() {
                 
                 setMasterKey(encKey); // Save EncKey for the session since we have the master password
                 setRecoveryKey(newRecoveryKey);
+
+                try {
+                    const shares = splitSecret(masterPassword, 5, 3);
+                    setGeneratedShares(shares);
+                } catch(e) {
+                    console.error("Failed to generate shares", e);
+                }
+
                 setShowRecoveryModal(true); // Modal will navigate to home when closed
                 
                 // We don't navigate yet, user must see recovery key
@@ -118,12 +129,11 @@ export default function Login() {
         
         setLoading(true);
         try {
-            const { authKey, encKey } = deriveKeys(newPassword, resetEmail);
-            await apiResetPassword(resetEmail, userRecoveryKey, authKey);
-            setMasterKey(encKey);
-            addToast("Password reset successful! Please login.", "success");
+            await apiResetPassword(resetEmail, userRecoveryKey, newPassword);
+            addToast("Account Login Password reset successful! Please login.", "success");
             setForgotMode(null);
             setEmail(resetEmail);
+            setLoginPassword('');
             setIsLogin(true);
         } catch (err) {
             addToast(err.message, 'error');
@@ -194,6 +204,13 @@ export default function Login() {
         setCopied(true);
         addToast("Recovery Key copied to clipboard!", "success");
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const copyShare = (share, idx) => {
+        navigator.clipboard.writeText(share);
+        setCopiedShareIndex(idx);
+        addToast(`Fragment #${idx+1} copied!`, "success");
+        setTimeout(() => setCopiedShareIndex(-1), 2000);
     };
 
     return (
@@ -269,7 +286,7 @@ export default function Login() {
                                     <p className="text-slate-400 text-sm">
                                         {forgotMode === 'email' ? "Enter your email to find your hint." : 
                                          forgotMode === 'hint' ? "Review your hint. If you still can't remember, use your Recovery Key." :
-                                         "Reset your master password using your Recovery Key."}
+                                         "Reset your Account Login Password using your Recovery Key."}
                                     </p>
                                 </div>
 
@@ -316,7 +333,7 @@ export default function Login() {
                                                 onClick={() => setForgotMode('reset')}
                                                 className="w-full py-3 bg-primary/20 hover:bg-primary/30 text-primary rounded-xl font-bold transition-all text-sm"
                                             >
-                                                Still Locked? Use Recovery Key
+                                                Still Locked? Reset Login Password
                                             </button>
                                         </div>
                                     </div>
@@ -341,7 +358,7 @@ export default function Login() {
                                                     type="password"
                                                     value={newPassword}
                                                     onChange={(e) => setNewPassword(e.target.value)}
-                                                    placeholder="New Master Password"
+                                                    placeholder="New Account Login Password"
                                                     className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3.5 pl-10 pr-4 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-sm tracking-widest"
                                                     required
                                                 />
@@ -359,10 +376,10 @@ export default function Login() {
                                             type="submit" disabled={loading}
                                             className="w-full py-4 bg-primary text-primary-foreground rounded-2xl font-bold flex items-center justify-center gap-2"
                                         >
-                                            {loading ? <Loader2 className="animate-spin" size={20} /> : "Reset Vault Password"}
+                                            {loading ? <Loader2 className="animate-spin" size={20} /> : "Reset Login Password"}
                                         </button>
-                                        <p className="text-[10px] text-center text-red-400 font-bold uppercase px-4 leading-relaxed">
-                                            Warning: This key is your only way back. If lost, your data is gone forever.
+                                        <p className="text-[10px] text-center text-blue-400 font-bold uppercase px-4 leading-relaxed mt-4">
+                                            Note: This resets your Account Login Password. Your Vault Master Password remains unchanged.
                                         </p>
                                     </form>
                                 )}
@@ -597,25 +614,13 @@ export default function Login() {
                                 )}
                             </form>
 
-                            {/* Trust & Security Info Section */}
-                            <div className="mt-10 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
-                                    <Shield size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-white mb-1 uppercase tracking-wider">Zero-Knowledge Architecture</p>
-                                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                                        Your Master Password never leaves your device. Encryption happens locally using AES-256.
-                                    </p>
-                                </div>
-                            </div>
                         </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
                 {/* Bottom Toggle Link */}
-                <div className="mt-8 text-center flex flex-col items-center space-y-4">
+                <div className="mt-8 text-center">
                     <p className="text-slate-400 text-sm font-medium">
                         {isLogin ? "Don't have an account yet?" : "Already protecting your data?"}
                         <button
@@ -625,12 +630,21 @@ export default function Login() {
                             {isLogin ? 'Join KeeperX' : 'Access Vault'}
                         </button>
                     </p>
-                    <div className="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em]">
-                        <a href="#" className="hover:text-slate-400 transition-colors">Privacy</a>
-                        <span className="opacity-30">•</span>
-                        <a href="#" className="hover:text-slate-400 transition-colors">Terms</a>
-                        <span className="opacity-30">•</span>
-                        <a href="#" className="hover:text-slate-400 transition-colors">Documentation</a>
+                </div>
+
+                {/* Trust & Security Info Section */}
+                <div className="mt-8 p-4 rounded-3xl bg-primary/5 border border-primary/20 flex flex-col sm:flex-row items-center sm:items-start gap-4 max-w-md mx-auto text-center sm:text-left shadow-2xl backdrop-blur-sm relative overflow-hidden group hover:border-primary/40 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                    <div className="relative p-3 bg-primary/10 rounded-2xl text-primary shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
+                        <Shield size={24} />
+                    </div>
+                    <div className="relative">
+                        <p className="text-sm font-black text-white mb-1 uppercase tracking-widest flex items-center justify-center sm:justify-start gap-2">
+                            Zero-Knowledge Architecture
+                        </p>
+                        <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                            Your Master Password never leaves your device. Unbreakable encryption happens purely offline via AES-256 before synchronization.
+                        </p>
                     </div>
                 </div>
             </motion.div>
@@ -652,25 +666,61 @@ export default function Login() {
                                 <KeyRound size={44} />
                             </div>
 
-                            <h3 className="text-2xl font-bold text-white mb-2">Your Recovery Key</h3>
-                            <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                                This key is your <span className="text-white font-bold">only lifeline</span>. Save it somewhere physical. Without this, your data <span className="text-red-400">cannot</span> be recovered if you forget your password.
+                            <h3 className="text-2xl font-bold text-white mb-2">Your Lifeline Credentials</h3>
+                            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                                Save these securely. They are the <span className="text-white font-bold">only way</span> to recover your data if you are locked out.
                             </p>
 
-                            <div className="relative group cursor-pointer mb-8" onClick={copyRecoveryKey}>
-                                <div className="bg-black/40 border border-white/10 rounded-2xl p-4 sm:p-6 font-mono text-base sm:text-2xl tracking-[0.15em] sm:tracking-[0.3em] text-primary font-bold shadow-inner break-all">
-                                    {recoveryKey}
+                            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 pb-2 text-left">
+                                {/* Recovery Key Block */}
+                                <div className="space-y-2">
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                                        <AlertCircle size={14} /> Account Recovery Key
+                                    </h4>
+                                    <p className="text-[11px] text-slate-400">Use this to reset your login password. Does NOT decrypt vault.</p>
+                                    <div className="relative group cursor-pointer" onClick={copyRecoveryKey}>
+                                        <div className="bg-black/40 border border-white/10 rounded-xl p-4 font-mono text-base md:text-xl tracking-widest text-primary font-bold shadow-inner flex justify-between items-center break-all transition-colors group-hover:border-primary/50">
+                                            {recoveryKey}
+                                            {copied ? <Check size={20} className="text-green-400 shrink-0 ml-2" /> : <Copy size={20} className="text-primary/50 group-hover:text-primary transition-colors shrink-0 ml-2" />}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="absolute inset-0 flex items-center justify-center bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl">
-                                    {copied ? <Check size={24} className="text-green-400" /> : <Copy size={24} className="text-primary" />}
-                                </div>
+
+                                {/* Cryptographic Fragments Block */}
+                                {generatedShares.length > 0 && (
+                                    <div className="space-y-3 pt-5 border-t border-white/10">
+                                         <h4 className="text-xs font-bold uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                                            <Shield size={14} /> Vault Cryptographic Fragments
+                                         </h4>
+                                         <p className="text-[11px] text-slate-400 leading-relaxed max-w-sm">
+                                             Give them to trusted allies. <span className="text-orange-400 font-bold">Any 3 keys</span> can mathematically reconstruct your Vault Master Password offline.
+                                         </p>
+                                         <div className="grid grid-cols-1 gap-2 mt-2">
+                                            {generatedShares.map((share, idx) => (
+                                                <div 
+                                                    key={idx} 
+                                                    onClick={() => copyShare(share, idx)}
+                                                    className="flex items-center gap-3 bg-black/40 border border-white/10 hover:border-orange-500/50 rounded-xl p-3 cursor-pointer group transition-all"
+                                                >
+                                                    <span className="text-[10px] font-bold text-orange-500/70 w-4">#{idx+1}</span>
+                                                    <span className="font-mono text-xs text-white/70 group-hover:text-white truncate flex-1">{share}</span>
+                                                    {copiedShareIndex === idx ? (
+                                                        <Check size={16} className="text-green-400 shrink-0" />
+                                                    ) : (
+                                                        <Copy size={16} className="text-white/20 group-hover:text-orange-500 transition-colors shrink-0" />
+                                                    )}
+                                                </div>
+                                            ))}
+                                         </div>
+                                    </div>
+                                )}
                             </div>
 
                             <button 
                                 onClick={() => navigate('/')}
-                                className="w-full py-4 bg-primary text-primary-foreground rounded-2xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all"
+                                className="w-full mt-6 py-4 bg-primary text-primary-foreground rounded-2xl font-bold hover:shadow-lg hover:shadow-primary/20 transition-all font-medium"
                             >
-                                I've Saved the Key
+                                I've Saved Everything Securely
                             </button>
                         </motion.div>
                     </motion.div>

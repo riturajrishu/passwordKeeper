@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { logoutUser, fetchVaultItems } from '../lib/api';
 import useAuthStore from '../store/useAuthStore';
 import useToastStore from '../store/useToastStore';
+import useNotificationStore from '../store/useNotificationStore';
 import clsx from 'clsx';
 
 const navItems = [
@@ -30,6 +31,7 @@ export default function Sidebar({ isOpen, onClose }) {
     const lockVault = useAuthStore(s => s.lockVault);
     const logout = useAuthStore(s => s.logout);
     const addToast = useToastStore(s => s.addToast);
+    const clearNotifications = useNotificationStore(s => s.clearAll);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [trashCount, setTrashCount] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
@@ -52,6 +54,7 @@ export default function Sidebar({ isOpen, onClose }) {
         try {
             await logoutUser();
             logout();
+            clearNotifications(); // Prevent notification state leak
             navigate('/login');
         } catch {
             addToast('Logout failed', 'error');

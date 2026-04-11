@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import { deriveKeys } from '../lib/crypto';
 import { verifyMasterPassword, logoutUser } from '../lib/api';
-import { Lock, Unlock, KeyRound, AlertCircle, Keyboard, Loader2 } from 'lucide-react';
+import { Lock, Unlock, KeyRound, AlertCircle, Keyboard, Loader2, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { recoverSecret } from '../lib/shamir';
 import useToastStore from '../store/useToastStore';
 import VirtualKeyboard from '../components/VirtualKeyboard';
 
@@ -13,6 +14,9 @@ export default function MasterPasswordPrompt() {
   const [isShaking, setIsShaking] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryShares, setRecoveryShares] = useState(['', '', '']);
+  const [recoveredMasterPassword, setRecoveredMasterPassword] = useState('');
   const user = useAuthStore(s => s.user);
     const setMasterKey = useAuthStore(s => s.setMasterKey);
     const logout = useAuthStore(s => s.logout);
@@ -61,6 +65,22 @@ export default function MasterPasswordPrompt() {
   const triggerShake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 500);
+  };
+
+  const handleRecover = () => {
+    const validShares = recoveryShares.map(s => s.trim()).filter(Boolean);
+    if(validShares.length < 3) return addToast("You need exactly 3 shares", "warning");
+    try {
+        const secret = recoverSecret(validShares);
+        setPassword(secret);
+        setRecoveredMasterPassword(secret);
+        addToast("Master password reconstructed successfully!", "success");
+        // Clear shares but keep UI open to show the recovered password
+        setRecoveryShares(['', '', '']);
+    } catch(e) {
+        addToast("Failed to recover. Invalid or corrupted shares.", "error");
+        triggerShake();
+    }
   };
 
   return (
@@ -173,6 +193,74 @@ export default function MasterPasswordPrompt() {
             {loading ? <Loader2 className="animate-spin" size={20} /> : <Unlock size={20} />}
             {loading ? 'Verifying...' : 'Decrypt Vault'}
           </motion.button>
+
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            transition={{ delay: 0.7 }}
+            className="flex justify-center items-center mt-6"
+          >
+              <button
+                type="button"
+                onClick={() => setShowRecovery(!showRecovery)}
+                className="text-xs font-bold uppercase tracking-widest text-sky-500/70 hover:text-sky-500 transition-colors"
+              >
+                {showRecovery ? 'Hide Recovery Tool' : 'Recover Master Password'}
+              </button>
+          </motion.div>
+
+          <AnimatePresence>
+            {showRecovery && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="overflow-hidden space-y-4 pt-6 border-t border-border/50"
+              >
+                <div className="text-left">
+                     <h3 className="font-bold text-sm text-sky-500 uppercase tracking-widest mb-2">Recover Vault Access</h3>
+                     <p className="text-xs text-muted-foreground leading-relaxed">
+                         Paste any 3 trusted fragments below to mathematically reconstruct the master password. Done 100% locally offline.
+                     </p>
+                </div>
+                
+                {recoveryShares.map((val, idx) => (
+                    <input 
+                        key={idx}
+                        value={val}
+                        onChange={e => {
+                            const newShares = [...recoveryShares];
+                            newShares[idx] = e.target.value;
+                            setRecoveryShares(newShares);
+                        }}
+                        className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-border focus:ring-2 focus:ring-sky-500/40 focus:outline-none text-xs font-mono placeholder:font-sans" 
+                        placeholder={`Paste Share Fragment ${idx+1}`} 
+                    />
+                ))}
+
+                <button 
+                    type="button"
+                    onClick={handleRecover} 
+                    className="bg-sky-500 text-white px-6 py-3.5 rounded-xl font-bold shadow-md shadow-sky-500/20 w-full hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 mt-2"
+                >
+                    <Shield size={18} /> Reconstruct Password
+                </button>
+
+                {recoveredMasterPassword && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-4 bg-green-500/10 border border-green-500/30 rounded-2xl text-center mt-4"
+                    >
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-green-500 mb-1">Recovered Master Password Auto-filled</p>
+                        <p className="font-mono text-lg font-bold text-green-500 bg-background/50 px-3 py-1 inline-block rounded-xl select-all">
+                            {recoveredMasterPassword}
+                        </p>
+                    </motion.div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </form>
 
         <motion.button

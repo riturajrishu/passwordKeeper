@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Trash2, Search, ShieldAlert, AlertCircle, Check, HelpCircle, Phone, FileText, Lock, Activity, Eye, ShieldCheck, Info, MessageSquare } from 'lucide-react';
+import { Users, Trash2, Search, ShieldAlert, AlertCircle, Check, HelpCircle, Phone, FileText, Lock, Activity, Eye, ShieldCheck, Info, MessageSquare, Key } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useToastStore from '../store/useToastStore';
-import { API_URL } from '../lib/api';
+import { API_URL, adminResetUserPassword } from '../lib/api';
 
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('users'); // 'users' or 'tickets'
@@ -16,6 +16,9 @@ export default function AdminDashboard() {
     const addToast = useToastStore(s => s.addToast);
 
     const [deleteModal, setDeleteModal] = useState({ show: false, targetUser: null, confirmation: '' });
+    const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, targetUser: null, newPassword: '' });
+    const [isResetting, setIsResetting] = useState(false);
+    
     const [selectedUser, setSelectedUser] = useState(null); // For User Detail Modal
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
@@ -127,6 +130,24 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleResetLoginPassword = async (e) => {
+        e.preventDefault();
+        if (resetPasswordModal.newPassword.length < 8) {
+            return addToast('Password must be at least 8 characters long', 'error');
+        }
+
+        try {
+            setIsResetting(true);
+            await adminResetUserPassword(resetPasswordModal.targetUser._id, resetPasswordModal.newPassword);
+            addToast(`Password for ${resetPasswordModal.targetUser.email} has been reset permanently!`, 'success');
+            setResetPasswordModal({ show: false, targetUser: null, newPassword: '' });
+        } catch (error) {
+            addToast(error.message || 'Failed to reset password', 'error');
+        } finally {
+            setIsResetting(false);
+        }
+    };
+
     const filteredUsers = users.filter(u => 
         u.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
         (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -230,13 +251,22 @@ export default function AdminDashboard() {
                                                 </td>
                                                 <td className="py-4 px-4 text-right">
                                                     {user._id !== currentUser.uid && (
-                                                        <button
-                                                            onClick={() => setDeleteModal({ show: true, targetUser: user, confirmation: '' })}
-                                                            className="p-2 ml-auto text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-red-500/30"
-                                                            title="Delete User"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                onClick={() => setResetPasswordModal({ show: true, targetUser: user, newPassword: '' })}
+                                                                className="p-2 text-sky-400 hover:text-white hover:bg-sky-500 rounded-lg transition-colors border border-sky-500/30"
+                                                                title="Reset Login Password"
+                                                            >
+                                                                <Key size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeleteModal({ show: true, targetUser: user, confirmation: '' })}
+                                                                className="p-2 text-red-400 hover:text-white hover:bg-red-500 rounded-lg transition-colors border border-red-500/30"
+                                                                title="Delete User"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </td>
                                             </tr>
@@ -470,11 +500,71 @@ export default function AdminDashboard() {
                                         {isDeleting ? 'Deleting...' : 'Destroy Data'}
                                     </button>
                                 </div>
-                            </form>
+                                </form>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
+                    )}
+                </AnimatePresence>
+
+                {/* Reset Password Modal */}
+                <AnimatePresence>
+                    {resetPasswordModal.show && (
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                                className="bg-card w-full max-w-md rounded-2xl border border-sky-500/30 p-6 shadow-2xl relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 to-blue-600" />
+                                <div className="flex items-center gap-3 mb-4 text-sky-400">
+                                    <Key size={28} />
+                                    <h3 className="text-lg font-bold">Admin Force Reset Password</h3>
+                                </div>
+                                
+                                <div className="bg-sky-500/10 text-sky-500 p-3 rounded-xl mb-4 text-sm font-medium">
+                                    <p className="flex items-start gap-2">
+                                        <Info size={16} className="shrink-0 mt-0.5" />
+                                        This will immediately override the Account Login Password for <strong>{resetPasswordModal.targetUser.email}</strong>. This does NOT compromise their Vault Master Password.
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleResetLoginPassword}>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
+                                        New Account Login Password
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        minLength={8}
+                                        value={resetPasswordModal.newPassword}
+                                        onChange={(e) => setResetPasswordModal({ ...resetPasswordModal, newPassword: e.target.value })}
+                                        className="w-full bg-background border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-sky-500 transition-colors text-foreground font-mono"
+                                        placeholder="Type new password"
+                                    />
+                                    
+                                    <div className="mt-6 flex justify-end gap-3 text-sm">
+                                        <button
+                                            type="button"
+                                            onClick={() => setResetPasswordModal({ show: false, targetUser: null, newPassword: '' })}
+                                            className="px-4 py-2 text-foreground font-bold hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isResetting || resetPasswordModal.newPassword.length < 8}
+                                            className="px-4 py-2 bg-sky-500 text-white font-bold rounded-xl flex items-center gap-2 hover:bg-sky-600 transition-colors disabled:opacity-50"
+                                        >
+                                            {isResetting ? 'Resetting...' : 'Reset Login Password'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        );
 }
