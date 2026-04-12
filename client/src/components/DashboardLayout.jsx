@@ -137,6 +137,12 @@ const DashboardLayout = () => {
     const location = useLocation();
     const currentOutlet = useOutlet();
 
+    // Fix: Force scroll to top on route change. Prevents the layout from being shifted up out of bounds,
+    // which happens when the mobile keyboard is open during login and leaves the viewport scrolled down.
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, [location.pathname]);
+
     return (
         <div className="flex h-[100dvh] bg-background text-foreground overflow-hidden">
             {/* Background Managers (No-UI) */}
