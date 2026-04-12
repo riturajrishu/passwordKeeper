@@ -6,15 +6,65 @@ import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 const rpName = 'Keeper X';
-const origin = process.env.CLIENT_URL || 'http://localhost:5173';
-const rpID = process.env.CLIENT_URL ? new URL(process.env.CLIENT_URL).hostname : 'localhost';
 
 // Store challenge temporarily (in production use Redis/DB)
 const currentChallenges = {};
 
+/**
+ * Dynamically compute WebAuthn Relying Party config from the request context.
+ * Priority: request origin header (always matches actual domain) > CLIENT_URL env > fallback.
+ * This ensures passkeys work correctly on BOTH localhost and the deployed production domain,
+ * even when the .env file contains the production CLIENT_URL.
+ */
+function getRpConfig(req) {
+    // 1. Best source: the browser's Origin header (matches the actual domain the user is on)
+    const requestOrigin = req.headers.origin;
+    if (requestOrigin) {
+        try {
+            const url = new URL(requestOrigin);
+            return {
+                origin: url.origin,
+                rpID: url.hostname,
+            };
+        } catch (e) {
+            // invalid origin header, fall through
+        }
+    }
+
+    // 2. Fallback: CLIENT_URL env var (useful for non-browser or same-origin requests without Origin header)
+    const clientUrl = process.env.CLIENT_URL;
+    if (clientUrl) {
+        try {
+            const url = new URL(clientUrl);
+            return {
+                origin: url.origin,
+                rpID: url.hostname,
+            };
+        } catch (e) {
+            console.error('Invalid CLIENT_URL format:', clientUrl);
+        }
+    }
+
+    // 3. Ultimate fallback: construct from request
+    const constructedOrigin = `${req.protocol}://${req.get('host')}`;
+    try {
+        const url = new URL(constructedOrigin);
+        return {
+            origin: url.origin,
+            rpID: url.hostname,
+        };
+    } catch (e) {
+        return {
+            origin: 'http://localhost:5173',
+            rpID: 'localhost',
+        };
+    }
+}
+
 // 1. Generate Registration Options (Logged-in user wants to add a passkey)
 router.get('/generate-registration-options', verifyToken, async (req, res) => {
     try {
+        const { rpID } = getRpConfig(req);
         const user = await User.findById(req.user.uid);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -49,6 +99,7 @@ router.get('/generate-registration-options', verifyToken, async (req, res) => {
 // 2. Verify Registration Response
 router.post('/verify-registration', verifyToken, async (req, res) => {
     try {
+        const { origin, rpID } = getRpConfig(req);
         const user = await User.findById(req.user.uid);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -87,6 +138,7 @@ router.post('/verify-registration', verifyToken, async (req, res) => {
 // 3. Generate Auth Options (User wants to login with passkey)
 router.post('/generate-auth-options', async (req, res) => {
     try {
+        const { rpID } = getRpConfig(req);
         const { email } = req.body;
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });
@@ -117,6 +169,7 @@ router.post('/generate-auth-options', async (req, res) => {
 // 4. Verify Auth Response
 router.post('/verify-auth', async (req, res) => {
     try {
+        const { origin, rpID } = getRpConfig(req);
         const { email, response } = req.body;
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });

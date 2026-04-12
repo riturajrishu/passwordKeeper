@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import useAuthStore from '../store/useAuthStore';
 import useToastStore from '../store/useToastStore';
 import useNotificationStore from '../store/useNotificationStore';
@@ -649,95 +650,102 @@ const Settings = () => {
                 </div>
             </div>
 
-            {/* Recovery Key Generator Modal */}
-            <AnimatePresence>
-                {recoveryModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
-                    >
+            {/* Recovery Key Generator Modal — Portaled to document.body to escape transform-gpu containment */}
+            {ReactDOM.createPortal(
+                <AnimatePresence>
+                    {recoveryModal && (
                         <motion.div
-                            initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-                            className="bg-card w-full max-w-md rounded-3xl border border-border p-6 shadow-2xl relative overflow-hidden"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+                            onClick={() => setRecoveryModal(false)}
                         >
-                            {!newGeneratedRecoveryKey ? (
-                                <form onSubmit={handleRegenerateRecoveryKey} className="space-y-6">
-                                    <div className="flex items-center gap-3 mb-2 text-primary">
-                                        <AlertCircle size={28} />
-                                        <h3 className="text-xl font-bold">Verify Identity</h3>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">
-                                        To generate a new Account Recovery Key, please enter your <strong className="text-foreground">Current Account Login Password</strong>.
-                                    </p>
-
-                                    <div className="space-y-2">
-                                        <input
-                                            type="password"
-                                            required
-                                            value={recoveryLoginPassword}
-                                            onChange={(e) => setRecoveryLoginPassword(e.target.value)}
-                                            className="w-full bg-black/5 dark:bg-white/5 border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors text-sm"
-                                            placeholder="Enter Login Password"
-                                        />
-                                    </div>
-                                    
-                                    <div className="flex justify-end gap-3 pt-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setRecoveryModal(false)}
-                                            className="px-4 py-2 font-bold text-muted-foreground hover:text-foreground rounded-xl transition-colors text-sm"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={recoveryKeyLoading}
-                                            className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-xl flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all text-sm"
-                                        >
-                                            {recoveryKeyLoading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-                                            Generate Key
-                                        </button>
-                                    </div>
-                                </form>
-                            ) : (
-                                <div className="space-y-6 text-center">
-                                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500 mb-4">
-                                        <Check size={32} />
-                                    </div>
-                                    <h3 className="text-2xl font-bold">New Key Generated</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        This is your new Account Recovery Key. Your old keys will no longer work. Save this securely right now!
-                                    </p>
-
-                                    <div 
-                                        className="bg-black/20 border border-primary/30 p-5 rounded-2xl cursor-pointer group relative overflow-hidden"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(newGeneratedRecoveryKey);
-                                            setRecoveryCopied(true);
-                                            setTimeout(() => setRecoveryCopied(false), 2000);
-                                            addToast("Recovery Key Copied", "success");
-                                        }}
-                                    >
-                                        <p className="font-mono text-xl tracking-widest text-primary font-bold group-hover:blur-[2px] transition-all">
-                                            {newGeneratedRecoveryKey}
-                                        </p>
-                                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                                            {recoveryCopied ? <span className="font-bold text-white text-sm">Copied!</span> : <span className="font-bold text-white text-sm">Click to Copy</span>}
+                            <motion.div
+                                initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                                className="bg-card w-full max-w-md rounded-3xl border border-border p-5 sm:p-6 shadow-2xl relative overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {!newGeneratedRecoveryKey ? (
+                                    <form onSubmit={handleRegenerateRecoveryKey} className="space-y-5 sm:space-y-6">
+                                        <div className="flex items-center gap-3 mb-2 text-primary">
+                                            <AlertCircle size={28} />
+                                            <h3 className="text-lg sm:text-xl font-bold">Verify Identity</h3>
                                         </div>
-                                    </div>
+                                        <p className="text-xs sm:text-sm text-muted-foreground">
+                                            To generate a new Account Recovery Key, please enter your <strong className="text-foreground">Current Account Login Password</strong>.
+                                        </p>
 
-                                    <button
-                                        onClick={() => setRecoveryModal(false)}
-                                        className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all"
-                                    >
-                                        I've Saved It Safely
-                                    </button>
-                                </div>
-                            )}
+                                        <div className="space-y-2">
+                                            <input
+                                                type="password"
+                                                required
+                                                autoFocus
+                                                value={recoveryLoginPassword}
+                                                onChange={(e) => setRecoveryLoginPassword(e.target.value)}
+                                                className="w-full bg-black/5 dark:bg-white/5 border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors text-sm"
+                                                placeholder="Enter Login Password"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex justify-end gap-3 pt-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setRecoveryModal(false)}
+                                                className="px-4 py-2.5 font-bold text-muted-foreground hover:text-foreground rounded-xl transition-colors text-sm"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={recoveryKeyLoading}
+                                                className="px-5 sm:px-6 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all text-sm"
+                                            >
+                                                {recoveryKeyLoading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                                                Generate Key
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="space-y-5 sm:space-y-6 text-center">
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto text-green-500 mb-4">
+                                            <Check size={28} className="sm:hidden" />
+                                            <Check size={32} className="hidden sm:block" />
+                                        </div>
+                                        <h3 className="text-xl sm:text-2xl font-bold">New Key Generated</h3>
+                                        <p className="text-xs sm:text-sm text-muted-foreground">
+                                            This is your new Account Recovery Key. Your old keys will no longer work. Save this securely right now!
+                                        </p>
+
+                                        <div 
+                                            className="bg-black/20 border border-primary/30 p-4 sm:p-5 rounded-2xl cursor-pointer group relative overflow-hidden"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(newGeneratedRecoveryKey);
+                                                setRecoveryCopied(true);
+                                                setTimeout(() => setRecoveryCopied(false), 2000);
+                                                addToast("Recovery Key Copied", "success");
+                                            }}
+                                        >
+                                            <p className="font-mono text-base sm:text-xl tracking-widest text-primary font-bold group-hover:blur-[2px] transition-all break-all">
+                                                {newGeneratedRecoveryKey}
+                                            </p>
+                                            <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                                                {recoveryCopied ? <span className="font-bold text-white text-sm">Copied!</span> : <span className="font-bold text-white text-sm">Click to Copy</span>}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => setRecoveryModal(false)}
+                                            className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all text-sm sm:text-base"
+                                        >
+                                            I've Saved It Safely
+                                        </button>
+                                    </div>
+                                )}
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 };
